@@ -5,6 +5,30 @@ const ENTRY_API_URL = 'http://localhost/microservicio/entry-service';
 class EntryService {
     constructor() {}
 
+    // Buscar estudiante por código
+    async findStudentByCode(code) {
+        try {
+            // Asegurarnos que la URL esté bien formada
+            const url = `${ENTRY_API_URL}/entries/student?code=${encodeURIComponent(code)}`;
+            console.log("Consultando URL:", url);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: auth.getAuthHeaders()
+            });
+
+            const jsonResponse = await response.json();
+            console.log("Respuesta del servidor:", jsonResponse);
+            return jsonResponse;
+        } catch (error) {
+            console.error('Error al buscar estudiante:', error);
+            return {
+                status: 'error',
+                message: 'Error de conexión con el servidor'
+            };
+        }
+    }
+
     // Registrar una nueva entrada
     async registerEntry(entryData) {
         try {

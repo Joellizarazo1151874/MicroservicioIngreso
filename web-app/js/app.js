@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const consultasSection = document.getElementById('consultasSection');
     
     // Formularios
+    const searchStudentForm = document.getElementById('searchStudentForm');
+    const studentInfo = document.getElementById('studentInfo');
     const entryForm = document.getElementById('entryForm');
     
     // Botones de acción
@@ -82,11 +84,66 @@ document.addEventListener('DOMContentLoaded', () => {
         // Activar el enlace correspondiente
         if (section === registrarEntradaSection) {
             navRegistrarEntrada.classList.add('active');
+            // Ocultar info de estudiante cuando cambiamos a esta sección
+            studentInfo.classList.add('d-none');
+            searchStudentForm.reset();
         } else if (section === entradasActivasSection) {
             navEntradasActivas.classList.add('active');
             loadActiveEntries(); // Cargar entradas activas
         } else if (section === consultasSection) {
             navConsultas.classList.add('active');
+        }
+    };
+    
+    // Buscar estudiante por código
+    const searchStudent = async (code) => {
+        try {
+            const response = await entryService.findStudentByCode(code);
+            
+            if (response.status === 'success') {
+                // Mostrar información del estudiante
+                document.getElementById('studentName').textContent = response.student.nombre;
+                document.getElementById('studentEmail').textContent = response.student.correo;
+                document.getElementById('studentCodeInfo').textContent = response.student.codigo;
+                document.getElementById('studentProgram').textContent = response.student.programa || 'No especificado';
+                document.getElementById('studentFaculty').textContent = response.student.facultad || 'No especificado';
+                
+                // Llenar campos ocultos del formulario
+                document.getElementById('nombre').value = response.student.nombre;
+                document.getElementById('correo').value = response.student.correo;
+                document.getElementById('codigo').value = response.student.codigo;
+                document.getElementById('programa').value = response.student.programa || '';
+                document.getElementById('facultad').value = response.student.facultad || '';
+                
+                // Mostrar formulario de registro
+                studentInfo.classList.remove('d-none');
+                
+                return true;
+            } else {
+                // Mostrar mensaje de error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message || 'No se encontró el estudiante con ese código'
+                });
+                
+                // Ocultar formulario de registro
+                studentInfo.classList.add('d-none');
+                
+                return false;
+            }
+        } catch (error) {
+            console.error('Error al buscar estudiante:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error de conexión con el servidor'
+            });
+            
+            // Ocultar formulario de registro
+            studentInfo.classList.add('d-none');
+            
+            return false;
         }
     };
     
@@ -374,9 +431,36 @@ document.addEventListener('DOMContentLoaded', () => {
         showSection(consultasSection);
     });
     
+    // Buscar estudiante
+    searchStudentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = document.getElementById('studentCode').value;
+        
+        if (!code) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo Requerido',
+                text: 'Por favor, ingrese el código del estudiante'
+            });
+            return;
+        }
+        
+        await searchStudent(code);
+    });
+    
     // Registro de entrada
     entryForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const sede = document.getElementById('sede').value;
+        if (!sede) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo Requerido',
+                text: 'Por favor, seleccione una sede'
+            });
+            return;
+        }
         
         // Obtener datos del formulario
         const entryData = {
@@ -385,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
             codigo: document.getElementById('codigo').value,
             programa: document.getElementById('programa').value,
             facultad: document.getElementById('facultad').value,
-            sede: document.getElementById('sede').value
+            sede: sede
         };
         
         try {
@@ -399,8 +483,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     text: 'Entrada registrada exitosamente'
                 });
                 
-                // Limpiar formulario
+                // Limpiar formularios
                 entryForm.reset();
+                searchStudentForm.reset();
+                studentInfo.classList.add('d-none');
             } else {
                 // Mostrar mensaje de error
                 Swal.fire({

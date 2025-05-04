@@ -44,8 +44,57 @@ $response = [
     'message' => 'Endpoint no válido'
 ];
 
+// Ruta para buscar estudiante por código
+if ($method === 'GET' && $endpoint === 'student') {
+    error_log("Solicitando estudiante con método: $method y endpoint: $endpoint");
+    $user_data = verifyToken();
+    
+    if (!$user_data) {
+        $response = [
+            'status' => 'error',
+            'message' => 'No autorizado'
+        ];
+    } else {
+        // Validar parámetros requeridos
+        if (!isset($_GET['code'])) {
+            $response = [
+                'status' => 'error',
+                'message' => 'Código de estudiante es requerido'
+            ];
+        } else {
+            // Obtener parámetros
+            $code = $_GET['code'];
+            error_log("Buscando estudiante con código: $code");
+            
+            // Buscar estudiante
+            $student = $entry->findStudentByCode($code);
+            
+            if ($student) {
+                error_log("Estudiante encontrado: " . json_encode($student));
+                $response = [
+                    'status' => 'success',
+                    'message' => 'Estudiante encontrado',
+                    'student' => [
+                        'nombre' => $student['firstname'] . ' ' . $student['surname'],
+                        'correo' => $student['email'],
+                        'codigo' => $student['cardnumber'],
+                        'programa' => $student['sort1'] ?? '',
+                        'facultad' => $student['branchcode'] ?? ''
+                    ]
+                ];
+            } else {
+                error_log("Estudiante no encontrado para código: $code");
+                $response = [
+                    'status' => 'error',
+                    'message' => 'Estudiante no encontrado'
+                ];
+            }
+        }
+    }
+}
+
 // Ruta para registrar entrada
-if ($method === 'POST' && $endpoint === 'register') {
+elseif ($method === 'POST' && $endpoint === 'register') {
     $user_data = verifyToken();
     
     if (!$user_data) {

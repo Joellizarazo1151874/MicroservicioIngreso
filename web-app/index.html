@@ -71,49 +71,58 @@
                             <h5>Registrar Entrada</h5>
                         </div>
                         <div class="card-body">
-                            <form id="entryForm">
+                            <form id="searchStudentForm" class="mb-4">
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label for="nombre" class="form-label">Nombre Completo</label>
-                                        <input type="text" class="form-control" id="nombre" required>
+                                        <label for="studentCode" class="form-label">Código de Estudiante</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="studentCode" placeholder="Ingrese el código" required>
+                                            <button type="submit" class="btn btn-primary">Buscar</button>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="correo" class="form-label">Correo Electrónico</label>
-                                        <input type="email" class="form-control" id="correo" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <label for="codigo" class="form-label">Código</label>
-                                        <input type="text" class="form-control" id="codigo">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="programa" class="form-label">Programa</label>
-                                        <input type="text" class="form-control" id="programa">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="facultad" class="form-label">Facultad</label>
-                                        <input type="text" class="form-control" id="facultad">
-                                    </div>
-                                </div>
-                                
-                                <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <label for="sede" class="form-label">Sede</label>
-                                        <select class="form-select" id="sede" required>
-                                            <option value="">Seleccione una sede</option>
-                                            <option value="Principal">Principal</option>
-                                            <option value="Norte">Norte</option>
-                                            <option value="Sur">Sur</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary">Registrar Entrada</button>
                                 </div>
                             </form>
+                            
+                            <div id="studentInfo" class="d-none">
+                                <div class="alert alert-info">
+                                    <h6 class="mb-3">Información del Estudiante:</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Nombre:</strong> <span id="studentName"></span></p>
+                                            <p><strong>Correo:</strong> <span id="studentEmail"></span></p>
+                                            <p><strong>Código:</strong> <span id="studentCodeInfo"></span></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>Programa:</strong> <span id="studentProgram"></span></p>
+                                            <p><strong>Facultad:</strong> <span id="studentFaculty"></span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <form id="entryForm">
+                                    <input type="hidden" id="nombre" value="">
+                                    <input type="hidden" id="correo" value="">
+                                    <input type="hidden" id="codigo" value="">
+                                    <input type="hidden" id="programa" value="">
+                                    <input type="hidden" id="facultad" value="">
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="sede" class="form-label">Sede</label>
+                                            <select class="form-select" id="sede" required>
+                                                <option value="">Seleccione una sede</option>
+                                                <option value="Principal">Principal</option>
+                                                <option value="Norte">Norte</option>
+                                                <option value="Sur">Sur</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary">Registrar Entrada</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
