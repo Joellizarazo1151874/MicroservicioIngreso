@@ -52,6 +52,12 @@ define('DB_NAME', 'becl_admin');
 docker-compose down
 ```
 
+### 5. Reinciar los servicios
+
+```bash
+docker restart becl_mysql
+```
+
 ## Datos de prueba
 
 ### Usuarios disponibles
