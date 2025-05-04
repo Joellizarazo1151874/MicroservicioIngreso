@@ -1,6 +1,6 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f9;
+    background-color: #f8f8f8;
 }
 
 /* Login Form Styles */
@@ -28,26 +28,94 @@ body {
 
 /* Table Styles */
 .table th {
-    background-color: #f8f9fa;
+    background-color: #f8f8f8;
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
+    background-color: rgba(204, 0, 0, 0.05);
 }
 
 /* Button Styles */
 .btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
+    background-color: #ff0000;
+    border-color: #ff0000;
 }
 
 .btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+    background-color: #c00;
+    border-color: #900;
 }
 
 .btn-outline-light:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+/* Red and White Theme Overrides */
+.bg-primary, .btn-primary, .bg-danger {
+    background-color: #ff0000 !important;
+}
+
+/* Override Bootstrap's default blue focus */
+.form-control:focus, .form-select:focus, .form-check-input:focus {
+    border-color: #c00;
+    box-shadow: 0 0 0 0.25rem rgba(240, 12, 12, 0.699);
+}
+
+/* Override link colors */
+a {
+    color: #ff0000;
+}
+
+a:hover {
+    color: #cc0000;
+}
+
+/* Override pagination */
+.page-item.active .page-link {
+    background-color: #ff0000;
+    border-color: #ff0000;
+}
+
+.page-link {
+    color: #ff0000;
+}
+
+.page-link:hover {
+    color: #cc0000;
+}
+
+/* Override progress bars */
+.progress-bar {
+    background-color: #ff0000;
+}
+
+.text-primary {
+    color: #ff0000 !important;
+}
+
+.border-primary {
+    border-color: #ff0000 !important;
+}
+
+.alert-info {
+    background-color: #f8f8f8;
+    border-color: #e0e0e0;
+}
+
+.nav-link.active {
+    color: #fff !important;
+    font-weight: bold;
+}
+
+.nav-tabs .nav-link.active {
+    color: #ff0000 !important;
+    border-bottom: 2px solid #ff0000;
+}
+
+.form-control:focus {
+    border-color: #ff0000;
+    box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.5);
 }
 
 /* Utility Classes */

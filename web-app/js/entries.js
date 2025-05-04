@@ -135,6 +135,42 @@ class EntryService {
             };
         }
     }
+    
+    // Obtener todos los registros
+    async getAllEntries() {
+        try {
+            // Usamos la función de búsqueda por fecha con un rango muy amplio para obtener todos los registros
+            // Desde 2000-01-01 hasta la fecha actual + 1 día (para asegurar que incluya hoy)
+            const today = new Date();
+            today.setDate(today.getDate() + 1);
+            
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            const startDate = '2000-01-01';
+            const endDate = formatDate(today);
+            
+            const url = `${ENTRY_API_URL}/entries/by-date?inicio=${startDate}&fin=${endDate}`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: auth.getAuthHeaders()
+            });
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error al obtener todos los registros:', error);
+            return {
+                status: 'error',
+                message: 'Error de conexión con el servidor',
+                entries: []
+            };
+        }
+    }
 }
 
 // Exportar una instancia del servicio

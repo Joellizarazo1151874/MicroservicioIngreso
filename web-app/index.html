@@ -15,7 +15,7 @@
         <!-- Login Form -->
         <div id="loginForm" class="auth-form">
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-danger text-white">
                     <h3 class="text-center">BECL</h3>
                     <p class="text-center mb-0">Sistema de Registro de Biblioteca</p>
                 </div>
@@ -37,7 +37,7 @@
 
         <!-- Main App (hidden initially) -->
         <div id="mainApp" class="d-none">
-            <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
                 <div class="container-fluid">
                     <a class="navbar-brand" href="#">BECL - Sistema de Registro</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -67,7 +67,7 @@
                 <!-- Registrar Entrada Section -->
                 <div id="registrarEntradaSection" class="content-section">
                     <div class="card">
-                        <div class="card-header bg-primary text-white">
+                        <div class="card-header bg-danger text-white">
                             <h5>Registrar Entrada</h5>
                         </div>
                         <div class="card-body">
@@ -77,7 +77,7 @@
                                         <label for="studentCode" class="form-label">Código de Estudiante</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="studentCode" placeholder="Ingrese el código" required>
-                                            <button type="submit" class="btn btn-primary">Buscar</button>
+                                            <button type="submit" class="btn btn-primary">Registrar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -114,6 +114,7 @@
                                                 <option value="Principal">Principal</option>
                                                 <option value="Norte">Norte</option>
                                                 <option value="Sur">Sur</option>
+                                                <option value="Enfermeria">Enfermería</option>
                                             </select>
                                         </div>
                                     </div>
@@ -130,7 +131,7 @@
                 <!-- Entradas Activas Section -->
                 <div id="entradasActivasSection" class="content-section d-none">
                     <div class="card">
-                        <div class="card-header bg-primary text-white">
+                        <div class="card-header bg-danger text-white">
                             <h5>Entradas Activas</h5>
                         </div>
                         <div class="card-body">
@@ -141,6 +142,7 @@
                                         <option value="Principal">Principal</option>
                                         <option value="Norte">Norte</option>
                                         <option value="Sur">Sur</option>
+                                        <option value="Enfermeria">Enfermería</option>
                                     </select>
                                 </div>
                                 <div class="col-md-8">
@@ -172,7 +174,7 @@
                 <!-- Consultas Section -->
                 <div id="consultasSection" class="content-section d-none">
                     <div class="card">
-                        <div class="card-header bg-primary text-white">
+                        <div class="card-header bg-danger text-white">
                             <h5>Consultas</h5>
                         </div>
                         <div class="card-body">
@@ -203,6 +205,7 @@
                                                 <option value="Principal">Principal</option>
                                                 <option value="Norte">Norte</option>
                                                 <option value="Sur">Sur</option>
+                                                <option value="Enfermeria">Enfermería</option>
                                             </select>
                                         </div>
                                     </div>
@@ -255,8 +258,8 @@
     <!-- SweetAlert2 for notifications -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Custom JS -->
-    <script src="js/auth.js"></script>
-    <script src="js/entries.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/auth.js?v=1.0.1"></script>
+    <script src="js/entries.js?v=1.0.1"></script>
+    <script src="js/app.js?v=1.0.1"></script>
 </body>
 </html> 
