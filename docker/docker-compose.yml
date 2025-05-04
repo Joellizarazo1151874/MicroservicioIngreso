@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7
+    container_name: becl_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: becl_admin
+      MYSQL_USER: becladmin
+      MYSQL_PASSWORD: beclpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - becl_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: becl_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - becl_network
+
+networks:
+  becl_network:
+    driver: bridge
+
+volumes:
+  mysql_data: 
