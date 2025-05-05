@@ -28,6 +28,11 @@ class EntryService {
             };
         }
     }
+    
+    // Alias para findStudentByCode para mantener compatibilidad
+    async searchStudent(code) {
+        return this.findStudentByCode(code);
+    }
 
     // Registrar una nueva entrada
     async registerEntry(entryData) {

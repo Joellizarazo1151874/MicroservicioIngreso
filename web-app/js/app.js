@@ -197,29 +197,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
         } else if (username === 'computobecl') {
-            // Usuario de cómputo - vista especial
-            // Ocultar la navegación estándar
-            document.querySelector('.navbar-nav').classList.add('d-none');
-            
-            // Crear una sección especial para mostrar solo una imagen de PC
-            const computoSection = document.createElement('div');
-            computoSection.id = 'computoSection';
-            computoSection.classList.add('content-section');
-            computoSection.innerHTML = `
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5>Área de Cómputo</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3067/3067260.png" alt="Computadora" style="max-width: 200px;">
-                        <h4 class="mt-3">Bienvenido al área de cómputo</h4>
-                        <p>Acceso restringido solo para personal autorizado.</p>
-                    </div>
-                </div>
-            `;
-            
-            // Añadir la sección al contenedor principal
-            document.querySelector('.container.mt-4').appendChild(computoSection);
+            // Usuario de cómputo - mostrar la sección de gestión de equipos
+            // Mostrar la sección de cómputo que ya existe en el HTML
+            const computoSection = document.getElementById('computoSection');
+            if (computoSection) {
+                // Ocultar otras secciones
+                registrarEntradaSection.classList.add('d-none');
+                entradasActivasSection.classList.add('d-none');
+                consultasSection.classList.add('d-none');
+                estadisticasSection.classList.add('d-none');
+                
+                // Mostrar la sección de cómputo
+                computoSection.classList.remove('d-none');
+                
+                // Cambiar el color del encabezado a rojo para mantener consistencia
+                const cardHeader = computoSection.querySelector('.card-header');
+                if (cardHeader) {
+                    cardHeader.classList.remove('bg-primary');
+                    cardHeader.classList.add('bg-danger');
+                }
+                
+                // Cargar equipos disponibles al iniciar
+                loadAvailableEquipment();
+            }
         }
     };
     
@@ -887,6 +887,324 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
+    // Función para buscar estudiante para asignación de equipo
+    const searchStudentForCompute = async (code) => {
+        try {
+            // Mostrar indicador de carga
+            Swal.fire({
+                title: 'Buscando estudiante...',
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false
+            });
+            
+            // Llamar al servicio de cómputo para buscar estudiante
+            const response = await computoService.findStudentByCode(code);
+            
+            Swal.close();
+            
+            if (response.status === 'success') {
+                // Mostrar información del estudiante
+                const student = response.student;
+                document.getElementById('studentNameCompute').textContent = student.nombre || '';
+                document.getElementById('studentEmailCompute').textContent = student.correo || '';
+                document.getElementById('studentCodeInfoCompute').textContent = student.codigo || '';
+                document.getElementById('studentProgramCompute').textContent = student.programa || '';
+                document.getElementById('studentFacultyCompute').textContent = student.facultad || '';
+                
+                // Guardar datos en campos ocultos
+                document.getElementById('nombreCompute').value = student.nombre || '';
+                document.getElementById('correoCompute').value = student.correo || '';
+                document.getElementById('codigoCompute').value = student.codigo || '';
+                document.getElementById('programaCompute').value = student.programa || '';
+                document.getElementById('facultadCompute').value = student.facultad || '';
+                
+                // Mostrar el formulario de entrada
+                document.getElementById('studentInfoCompute').classList.remove('d-none');
+                
+                // Cargar equipos disponibles
+                loadAvailableEquipment();
+            } else {
+                // Mostrar mensaje de error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message || 'No se encontró el estudiante'
+                });
+                
+                // Ocultar información del estudiante
+                document.getElementById('studentInfoCompute').classList.add('d-none');
+            }
+        } catch (error) {
+            console.error('Error al buscar estudiante:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al buscar el estudiante'
+            });
+        }
+    };
+    
+    // Función para cargar equipos disponibles
+    const loadAvailableEquipment = async () => {
+        try {
+            // Llamar al servicio de cómputo para obtener equipos disponibles
+            const data = await computoService.getAvailableEquipos();
+            
+            // Obtener el selector de equipos
+            const equipoSelect = document.getElementById('equipoSelect');
+            
+            // Limpiar opciones actuales
+            equipoSelect.innerHTML = '<option value="">Seleccione un equipo</option>';
+            
+            // Añadir equipos disponibles
+            if (data.status === 'success' && data.equipos && data.equipos.length > 0) {
+                data.equipos.forEach(equipo => {
+                    const option = document.createElement('option');
+                    option.value = equipo.id;
+                    option.textContent = `${equipo.equipo}`;
+                    equipoSelect.appendChild(option);
+                });
+            } else {
+                // Añadir mensaje si no hay equipos disponibles
+                const option = document.createElement('option');
+                option.disabled = true;
+                option.textContent = 'No hay equipos disponibles';
+                equipoSelect.appendChild(option);
+            }
+        } catch (error) {
+            console.error('Error al cargar equipos disponibles:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron cargar los equipos disponibles'
+            });
+        }
+    };
+    
+    // Función para registrar entrada de equipo
+    const registerComputeEntry = async () => {
+        try {
+            // Obtener datos del formulario
+            const nombre = document.getElementById('nombreCompute').value;
+            const correo = document.getElementById('correoCompute').value;
+            const codigo = document.getElementById('codigoCompute').value;
+            const programa = document.getElementById('programaCompute').value;
+            const facultad = document.getElementById('facultadCompute').value;
+            const equipoId = document.getElementById('equipoSelect').value;
+            
+            // Validar que se haya seleccionado un equipo
+            if (!equipoId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atención',
+                    text: 'Por favor seleccione un equipo'
+                });
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            Swal.fire({
+                title: 'Registrando entrada...',
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false
+            });
+            
+            // Preparar datos para enviar
+            const data = await computoService.registerEntryEquipo({
+                nombre,
+                correo,
+                codigo,
+                programa,
+                facultad,
+                equipo: equipoId // Enviamos el ID del equipo como 'equipo' para que coincida con el backend
+            });
+            
+            Swal.close();
+            
+            if (data.status === 'success') {
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Éxito',
+                    text: 'Entrada registrada correctamente'
+                });
+                
+                // Limpiar formulario
+                document.getElementById('searchStudentComputeForm').reset();
+                document.getElementById('studentInfoCompute').classList.add('d-none');
+                
+                // Recargar equipos disponibles
+                loadAvailableEquipment();
+            } else {
+                // Mostrar mensaje de error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'No se pudo registrar la entrada'
+                });
+            }
+        } catch (error) {
+            console.error('Error al registrar entrada:', error);
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al registrar la entrada'
+            });
+        }
+    };
+    
+    // Función para cargar entradas activas de equipos
+    const loadActiveComputeEntries = async () => {
+        try {
+            // Mostrar indicador de carga
+            Swal.fire({
+                title: 'Cargando entradas activas...',
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false
+            });
+            
+            // Llamar al servicio de cómputo para obtener entradas activas
+            const data = await computoService.getActiveEntriesEquipo();
+            
+            Swal.close();
+            
+            // Obtener la tabla
+            const tableBody = document.getElementById('activeEntriesComputeTable');
+            
+            // Limpiar tabla
+            if (tableBody) {
+                tableBody.innerHTML = '';
+            } else {
+                console.error('No se encontró el elemento con ID "activeEntriesComputeTable"');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al cargar la tabla de entradas activas'
+                });
+                return;
+            }
+            
+            // Añadir entradas a la tabla
+            if (data.status === 'success' && data.entries && data.entries.length > 0) {
+                data.entries.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry.id}</td>
+                        <td>${entry.nombre}</td>
+                        <td>${entry.correo}</td>
+                        <td>${entry.codigo}</td>
+                        <td>${entry.numero_equipo}</td>
+                        <td>${entry.entrada}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger register-exit-compute" data-id="${entry.id}">
+                                <i class="fas fa-sign-out-alt"></i> Salida
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Añadir event listeners a los botones de salida
+                document.querySelectorAll('.register-exit-compute').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const entryId = this.getAttribute('data-id');
+                        registerComputeExit(entryId);
+                    });
+                });
+            } else {
+                // Mostrar mensaje si no hay entradas activas
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="7" class="text-center">No hay entradas activas</td>`;
+                tableBody.appendChild(row);
+            }
+        } catch (error) {
+            console.error('Error al cargar entradas activas:', error);
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron cargar las entradas activas'
+            });
+        }
+    };
+    
+    // Función para registrar salida de equipo
+    const registerComputeExit = async (entryId) => {
+        try {
+            // Confirmar acción
+            const result = await Swal.fire({
+                title: '¿Registrar salida?',
+                text: '¿Está seguro de registrar la salida de este equipo?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, registrar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc3545'
+            });
+            
+            if (result.isConfirmed) {
+                // Mostrar indicador de carga
+                Swal.fire({
+                    title: 'Registrando salida...',
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false
+                });
+                
+                // Llamar al servicio de cómputo para registrar salida
+                const data = await computoService.registerExitEquipo(entryId);
+                
+                Swal.close();
+                
+                if (data.status === 'success') {
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: 'Salida registrada correctamente'
+                    });
+                    
+                    // Recargar entradas activas
+                    loadActiveComputeEntries();
+                    
+                    // Recargar equipos disponibles
+                    loadAvailableEquipment();
+                } else {
+                    // Mostrar mensaje de error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'No se pudo registrar la salida'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error al registrar salida:', error);
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al registrar la salida'
+            });
+        }
+    };
+    
     // Event Listeners
     
     // Login
@@ -1345,7 +1663,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Iniciar la aplicación
+    // Event Listeners para la sección de cómputo
+    const searchStudentComputeForm = document.getElementById('searchStudentComputeForm');
+    if (searchStudentComputeForm) {
+        searchStudentComputeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const studentCode = document.getElementById('studentCodeCompute').value.trim();
+            if (studentCode) {
+                await searchStudentForCompute(studentCode);
+            }
+        });
+    }
+    
+    const entryComputeForm = document.getElementById('entryComputeForm');
+    if (entryComputeForm) {
+        entryComputeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await registerComputeEntry();
+        });
+    }
+    
+    const refreshActiveComputeBtn = document.getElementById('refreshActiveComputeBtn');
+    if (refreshActiveComputeBtn) {
+        refreshActiveComputeBtn.addEventListener('click', () => {
+            loadActiveComputeEntries();
+        });
+    }
+    
+    // Iniciar verificación de autenticación
     checkAuth();
     
     // Event listener para el botón de búsqueda general (se añade dinámicamente)
