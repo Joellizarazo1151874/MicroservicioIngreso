@@ -18,6 +18,7 @@ services:
       - ./becl_admin.sql:/docker-entrypoint-initdb.d/becl_admin.sql
       - ./becl_autenticacion.sql:/docker-entrypoint-initdb.d/becl_autenticacion.sql
       - ./becl_computo.sql:/docker-entrypoint-initdb.d/becl_computo.sql
+      - ./becl_funcionario.sql:/docker-entrypoint-initdb.d/becl_funcionario.sql
     networks:
       - becl_network
 

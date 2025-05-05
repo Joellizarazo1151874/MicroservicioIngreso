@@ -9,7 +9,7 @@ Este directorio contiene la configuración de Docker para el entorno de desarrol
 
 ## Estructura de Bases de Datos
 
-El sistema utiliza tres bases de datos independientes:
+El sistema utiliza cuatro bases de datos independientes:
 
 1. **becl_admin**: Base de datos principal que contiene:
    - Tabla `becl_registro`: Registros de entrada/salida de estudiantes
@@ -23,6 +23,9 @@ El sistema utiliza tres bases de datos independientes:
    - Tabla `becl_equipo`: Información de equipos de cómputo
    - Tabla `becl_registro_computo`: Registros de uso de equipos
 
+4. **becl_funcionario**: Base de datos para el servicio de funcionarios
+   - Tabla `becl_funcionario`: Información de fotos de funcionarios
+
 ## Instrucciones de uso
 
 ### 1. Iniciar los servicios
@@ -33,7 +36,7 @@ docker-compose up -d
 ```
 
 Esto iniciará los siguientes servicios:
-- MySQL (puerto 3306) con las tres bases de datos
+- MySQL (puerto 3306) con las cuatro bases de datos
 - phpMyAdmin (puerto 8080)
 
 ### 2. Acceder a la aplicación y phpMyAdmin
@@ -71,6 +74,14 @@ define('DB_PASS', 'root');
 define('DB_NAME', 'becl_computo');
 ```
 
+**Microservicio de funcionarios** (`funcionario-service/config.php`):
+```php
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', 'root');
+define('DB_NAME', 'becl_funcionario');
+```
+
 ### 4. Detener los servicios
 
 ```bash
@@ -90,4 +101,4 @@ docker restart becl_mysql
 - Usuario: adminbecl / Contraseña: abc123456 / Nivel: admin
 - Usuario: entradabecl / Contraseña: abc123456 / Nivel: entrada
 - Usuario: entradabecle / Contraseña: abc123 / Nivel: entrada
-- Usuario: computobecl / Contraseña: abc1234 / Nivel: entrada 
+- Usuario: computobecl / Contraseña: abc1234 / Nivel: entrada

@@ -57,7 +57,10 @@
                                 <a class="nav-link" href="#" id="navConsultas">Consultas</a>
                             </li>
                             <li class="nav-item" id="navEstadisticasItem">
-                                <a class="nav-link" id="navEstadisticas" href="#">Estadísticas</a>
+                                <a class="nav-link" href="#" id="navEstadisticas">Estadísticas</a>
+                            </li>
+                            <li class="nav-item" id="navFuncionariosItem">
+                                <a class="nav-link" href="#" id="navFuncionarios">Funcionarios</a>
                             </li>
                         </ul>
                         <div class="navbar-text text-white me-3">
@@ -519,6 +522,37 @@
                     </div>
                 </div>
 
+                <!-- Sección de Funcionarios -->
+                <div id="funcionariosSection" class="content-section d-none">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <h5>Funcionarios de la Biblioteca</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <button id="refreshFuncionariosBtn" class="btn btn-danger">Actualizar Lista</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Nombre</th>
+                                            <th>Apellido</th>
+                                            <th>Correo</th>
+                                            <th>Foto</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="funcionariosTableBody">
+                                        <!-- Aquí se cargarán los funcionarios dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -531,6 +565,7 @@
     <script src="js/entries.js?v=1.0.2"></script>
     <script src="js/stats.js?v=1.0.0"></script>
     <script src="js/computo.js"></script>
+    <script src="js/funcionarioService.js"></script>
     <script src="js/app.js?v=1.0.4"></script>
 </body>
 

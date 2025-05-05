@@ -18,3 +18,10 @@ USE becl_computo;
 
 -- Importar el contenido del archivo becl_computo.sql
 SOURCE /docker-entrypoint-initdb.d/becl_computo.sql;
+
+-- Crear y seleccionar la base de datos becl_funcionario
+CREATE DATABASE IF NOT EXISTS becl_funcionario;
+USE becl_funcionario;
+
+-- Importar el contenido del archivo becl_funcionario.sql
+SOURCE /docker-entrypoint-initdb.d/becl_funcionario.sql;

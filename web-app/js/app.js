@@ -16,12 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const navConsultas = document.getElementById('navConsultas');
     const navEstadisticas = document.getElementById('navEstadisticas');
     const navEstadisticasItem = document.getElementById('navEstadisticasItem');
+    const navFuncionarios = document.getElementById('navFuncionarios');
+    const navFuncionariosItem = document.getElementById('navFuncionariosItem');
     
     // Secciones
     const registrarEntradaSection = document.getElementById('registrarEntradaSection');
     const entradasActivasSection = document.getElementById('entradasActivasSection');
     const consultasSection = document.getElementById('consultasSection');
     const estadisticasSection = document.getElementById('estadisticasSection');
+    const funcionariosSection = document.getElementById('funcionariosSection');
     
     // Formularios
     const searchStudentForm = document.getElementById('searchStudentForm');
@@ -73,11 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
         entradasActivasSection.classList.add('d-none');
         consultasSection.classList.add('d-none');
         estadisticasSection.classList.add('d-none');
+        funcionariosSection.classList.add('d-none');
         
         navRegistrarEntrada.parentElement.classList.add('d-none');
         navEntradasActivas.parentElement.classList.add('d-none');
         navConsultas.parentElement.classList.add('d-none');
-        navEstadisticasItem.classList.add('d-none'); // Ocultar el elemento de estadísticas por defecto
+        navEstadisticas.parentElement.classList.add('d-none');
+        navFuncionarios.parentElement.classList.add('d-none');
         
         // Configurar según el usuario
         if (username === 'entradabecl') {
@@ -132,7 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
             navRegistrarEntrada.parentElement.classList.add('d-none');
             navEntradasActivas.parentElement.classList.remove('d-none');
             navConsultas.parentElement.classList.remove('d-none');
-            navEstadisticasItem.classList.remove('d-none'); // Mostrar el elemento de estadísticas solo para adminbecl
+            navEstadisticas.parentElement.classList.remove('d-none');
+            navFuncionarios.parentElement.classList.remove('d-none');
             
             // Activar la sección de consultas por defecto
             navConsultas.classList.add('active');
@@ -209,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 entradasActivasSection.classList.add('d-none');
                 consultasSection.classList.add('d-none');
                 estadisticasSection.classList.add('d-none');
+                funcionariosSection.classList.add('d-none');
                 
                 // Mostrar la sección de cómputo
                 computoSection.classList.remove('d-none');
@@ -219,9 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     cardHeader.classList.remove('bg-primary');
                     cardHeader.classList.add('bg-danger');
                 }
-                
-                // Cargar equipos disponibles al iniciar
-                loadAvailableEquipment();
             }
         }
     };
@@ -244,12 +248,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (entradasActivasSection) entradasActivasSection.classList.add('d-none');
         if (consultasSection) consultasSection.classList.add('d-none');
         if (estadisticasSection) estadisticasSection.classList.add('d-none');
+        if (funcionariosSection) funcionariosSection.classList.add('d-none');
         
         // Desactivar todos los enlaces de navegación
         if (navRegistrarEntrada) navRegistrarEntrada.classList.remove('active');
         if (navEntradasActivas) navEntradasActivas.classList.remove('active');
         if (navConsultas) navConsultas.classList.remove('active');
         if (navEstadisticas) navEstadisticas.classList.remove('active');
+        if (navFuncionarios) navFuncionarios.classList.remove('active');
         
         // Mostrar la sección solicitada
         section.classList.remove('d-none');
@@ -307,6 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     yearSelect.appendChild(option);
                 }
             }
+        } else if (section === funcionariosSection && navFuncionarios) {
+            navFuncionarios.classList.add('active');
+            loadFuncionarios(); // Cargar funcionarios
         }
     };
     
@@ -890,322 +899,150 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // Función para buscar estudiante para asignación de equipo
-    const searchStudentForCompute = async (code) => {
+    // Función para cargar funcionarios de la biblioteca
+    const loadFuncionarios = async () => {
         try {
             // Mostrar indicador de carga
             Swal.fire({
-                title: 'Buscando estudiante...',
+                title: 'Cargando funcionarios...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
-                },
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false
+                }
             });
             
-            // Llamar al servicio de cómputo para buscar estudiante
-            const response = await computoService.findStudentByCode(code);
+            // Llamar al servicio para obtener todos los funcionarios
+            const response = await funcionarioService.getAllFuncionarios();
             
+            // Cerrar el indicador de carga
             Swal.close();
             
-            if (response.status === 'success') {
-                // Mostrar información del estudiante
-                const student = response.student;
-                document.getElementById('studentNameCompute').textContent = student.nombre || '';
-                document.getElementById('studentEmailCompute').textContent = student.correo || '';
-                document.getElementById('studentCodeInfoCompute').textContent = student.codigo || '';
-                document.getElementById('studentProgramCompute').textContent = student.programa || '';
-                document.getElementById('studentFacultyCompute').textContent = student.facultad || '';
-                
-                // Guardar datos en campos ocultos
-                document.getElementById('nombreCompute').value = student.nombre || '';
-                document.getElementById('correoCompute').value = student.correo || '';
-                document.getElementById('codigoCompute').value = student.codigo || '';
-                document.getElementById('programaCompute').value = student.programa || '';
-                document.getElementById('facultadCompute').value = student.facultad || '';
-                
-                // Mostrar el formulario de entrada
-                document.getElementById('studentInfoCompute').classList.remove('d-none');
-                
-                // Cargar equipos disponibles
-                loadAvailableEquipment();
-            } else {
-                // Mostrar mensaje de error
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: response.message || 'No se encontró el estudiante'
-                });
-                
-                // Ocultar información del estudiante
-                document.getElementById('studentInfoCompute').classList.add('d-none');
-            }
-        } catch (error) {
-            console.error('Error al buscar estudiante:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al buscar el estudiante'
-            });
-        }
-    };
-    
-    // Función para cargar equipos disponibles
-    const loadAvailableEquipment = async () => {
-        try {
-            // Llamar al servicio de cómputo para obtener equipos disponibles
-            const data = await computoService.getAvailableEquipos();
-            
-            // Obtener el selector de equipos
-            const equipoSelect = document.getElementById('equipoSelect');
-            
-            // Limpiar opciones actuales
-            equipoSelect.innerHTML = '<option value="">Seleccione un equipo</option>';
-            
-            // Añadir equipos disponibles
-            if (data.status === 'success' && data.equipos && data.equipos.length > 0) {
-                data.equipos.forEach(equipo => {
-                    const option = document.createElement('option');
-                    option.value = equipo.id;
-                    option.textContent = `${equipo.equipo}`;
-                    equipoSelect.appendChild(option);
-                });
-            } else {
-                // Añadir mensaje si no hay equipos disponibles
-                const option = document.createElement('option');
-                option.disabled = true;
-                option.textContent = 'No hay equipos disponibles';
-                equipoSelect.appendChild(option);
-            }
-        } catch (error) {
-            console.error('Error al cargar equipos disponibles:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudieron cargar los equipos disponibles'
-            });
-        }
-    };
-    
-    // Función para registrar entrada de equipo
-    const registerComputeEntry = async () => {
-        try {
-            // Obtener datos del formulario
-            const nombre = document.getElementById('nombreCompute').value;
-            const correo = document.getElementById('correoCompute').value;
-            const codigo = document.getElementById('codigoCompute').value;
-            const programa = document.getElementById('programaCompute').value;
-            const facultad = document.getElementById('facultadCompute').value;
-            const equipoId = document.getElementById('equipoSelect').value;
-            
-            // Validar que se haya seleccionado un equipo
-            if (!equipoId) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Atención',
-                    text: 'Por favor seleccione un equipo'
-                });
-                return;
-            }
-            
-            // Mostrar indicador de carga
-            Swal.fire({
-                title: 'Registrando entrada...',
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false
-            });
-            
-            // Preparar datos para enviar
-            const data = await computoService.registerEntryEquipo({
-                nombre,
-                correo,
-                codigo,
-                programa,
-                facultad,
-                equipo: equipoId // Enviamos el ID del equipo como 'equipo' para que coincida con el backend
-            });
-            
-            Swal.close();
-            
-            if (data.status === 'success') {
-                // Mostrar mensaje de éxito
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Éxito',
-                    text: 'Entrada registrada correctamente'
-                });
-                
-                // Limpiar formulario
-                document.getElementById('searchStudentComputeForm').reset();
-                document.getElementById('studentInfoCompute').classList.add('d-none');
-                
-                // Recargar equipos disponibles
-                loadAvailableEquipment();
-            } else {
-                // Mostrar mensaje de error
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message || 'No se pudo registrar la entrada'
-                });
-            }
-        } catch (error) {
-            console.error('Error al registrar entrada:', error);
-            Swal.close();
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al registrar la entrada'
-            });
-        }
-    };
-    
-    // Función para cargar entradas activas de equipos
-    const loadActiveComputeEntries = async () => {
-        try {
-            // Mostrar indicador de carga
-            Swal.fire({
-                title: 'Cargando entradas activas...',
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false
-            });
-            
-            // Llamar al servicio de cómputo para obtener entradas activas
-            const data = await computoService.getActiveEntriesEquipo();
-            
-            Swal.close();
-            
-            // Obtener la tabla
-            const tableBody = document.getElementById('activeEntriesComputeTable');
-            
-            // Limpiar tabla
-            if (tableBody) {
+            if (response.status === 'success' && response.funcionarios && response.funcionarios.length > 0) {
+                // Limpiar la tabla
+                const tableBody = document.getElementById('funcionariosTableBody');
                 tableBody.innerHTML = '';
-            } else {
-                console.error('No se encontró el elemento con ID "activeEntriesComputeTable"');
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error al cargar la tabla de entradas activas'
-                });
-                return;
-            }
-            
-            // Añadir entradas a la tabla
-            if (data.status === 'success' && data.entries && data.entries.length > 0) {
-                data.entries.forEach(entry => {
+                
+                // Agregar cada funcionario a la tabla
+                response.funcionarios.forEach(funcionario => {
                     const row = document.createElement('tr');
+                    
+                    // Crear las celdas con la información del funcionario
                     row.innerHTML = `
-                        <td>${entry.id}</td>
-                        <td>${entry.nombre}</td>
-                        <td>${entry.correo}</td>
-                        <td>${entry.codigo}</td>
-                        <td>${entry.numero_equipo}</td>
-                        <td>${entry.entrada}</td>
+                        <td>${funcionario.cardnumber}</td>
+                        <td>${funcionario.firstname}</td>
+                        <td>${funcionario.surname}</td>
+                        <td>${funcionario.email}</td>
                         <td>
-                            <button class="btn btn-sm btn-danger register-exit-compute" data-id="${entry.id}">
-                                <i class="fas fa-sign-out-alt"></i> Salida
+                            <img src="../funcionario-service/fotos/${funcionario.foto}" 
+                                 alt="Foto de ${funcionario.firstname}" 
+                                 class="img-thumbnail" 
+                                 style="max-width: 100px; max-height: 100px;">
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-foto-btn" data-codigo="${funcionario.cardnumber}">
+                                <i class="fas fa-camera"></i> Cambiar Foto
                             </button>
                         </td>
                     `;
+                    
+                    // Agregar la fila a la tabla
                     tableBody.appendChild(row);
                 });
                 
-                // Añadir event listeners a los botones de salida
-                document.querySelectorAll('.register-exit-compute').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const entryId = this.getAttribute('data-id');
-                        registerComputeExit(entryId);
+                // Agregar event listeners a los botones de edición de foto
+                document.querySelectorAll('.edit-foto-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const codigo = e.currentTarget.getAttribute('data-codigo');
+                        openFotoUploadModal(codigo);
                     });
                 });
+                
             } else {
-                // Mostrar mensaje si no hay entradas activas
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="7" class="text-center">No hay entradas activas</td>`;
-                tableBody.appendChild(row);
+                // Mostrar mensaje si no hay funcionarios
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sin funcionarios',
+                    text: 'No se encontraron funcionarios de la biblioteca en el sistema.'
+                });
             }
         } catch (error) {
-            console.error('Error al cargar entradas activas:', error);
-            Swal.close();
+            console.error('Error al cargar funcionarios:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudieron cargar las entradas activas'
+                text: 'Ocurrió un error al cargar los funcionarios.'
             });
         }
     };
     
-    // Función para registrar salida de equipo
-    const registerComputeExit = async (entryId) => {
-        try {
-            // Confirmar acción
-            const result = await Swal.fire({
-                title: '¿Registrar salida?',
-                text: '¿Está seguro de registrar la salida de este equipo?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, registrar',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#dc3545'
-            });
-            
+    // Función para abrir modal de carga de foto
+    const openFotoUploadModal = (codigo) => {
+        Swal.fire({
+            title: 'Cambiar foto del funcionario',
+            html: `
+                <div class="mb-3">
+                    <label for="fotoUrl" class="form-label">URL de la imagen:</label>
+                    <input type="text" id="fotoUrl" class="form-control" placeholder="https://ejemplo.com/foto.jpg">
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Guardar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#dc3545',
+            preConfirm: () => {
+                const fotoUrl = document.getElementById('fotoUrl').value;
+                if (!fotoUrl) {
+                    Swal.showValidationMessage('Por favor ingrese una URL válida');
+                    return false;
+                }
+                return { fotoUrl };
+            }
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                // Mostrar indicador de carga
-                Swal.fire({
-                    title: 'Registrando salida...',
-                    didOpen: () => {
-                        Swal.showLoading();
-                    },
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false
-                });
-                
-                // Llamar al servicio de cómputo para registrar salida
-                const data = await computoService.registerExitEquipo(entryId);
-                
-                Swal.close();
-                
-                if (data.status === 'success') {
-                    // Mostrar mensaje de éxito
+                try {
+                    // Mostrar indicador de carga
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Éxito',
-                        text: 'Salida registrada correctamente'
+                        title: 'Guardando...',
+                        text: 'Por favor espere',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
                     });
                     
-                    // Recargar entradas activas
-                    loadActiveComputeEntries();
+                    // Llamar al servicio para guardar la foto
+                    const response = await funcionarioService.saveFuncionarioFoto(codigo, result.value.fotoUrl);
                     
-                    // Recargar equipos disponibles
-                    loadAvailableEquipment();
-                } else {
-                    // Mostrar mensaje de error
+                    // Cerrar el indicador de carga
+                    Swal.close();
+                    
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Éxito',
+                            text: 'Foto actualizada correctamente'
+                        }).then(() => {
+                            // Recargar la lista de funcionarios
+                            loadFuncionarios();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message || 'Ocurrió un error al guardar la foto'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error al guardar foto:', error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: data.message || 'No se pudo registrar la salida'
+                        text: 'Ocurrió un error al guardar la foto'
                     });
                 }
             }
-        } catch (error) {
-            console.error('Error al registrar salida:', error);
-            Swal.close();
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al registrar la salida'
-            });
-        }
+        });
     };
     
     // Event Listeners
@@ -1268,6 +1105,14 @@ document.addEventListener('DOMContentLoaded', () => {
         navEstadisticas.addEventListener('click', (e) => {
             e.preventDefault();
             showSection(estadisticasSection);
+        });
+    }
+    
+    // Event listener para la sección de funcionarios
+    if (navFuncionarios) {
+        navFuncionarios.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection(funcionariosSection);
         });
     }
     
@@ -1666,34 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Event Listeners para la sección de cómputo
-    const searchStudentComputeForm = document.getElementById('searchStudentComputeForm');
-    if (searchStudentComputeForm) {
-        searchStudentComputeForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const studentCode = document.getElementById('studentCodeCompute').value.trim();
-            if (studentCode) {
-                await searchStudentForCompute(studentCode);
-            }
-        });
-    }
-    
-    const entryComputeForm = document.getElementById('entryComputeForm');
-    if (entryComputeForm) {
-        entryComputeForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await registerComputeEntry();
-        });
-    }
-    
-    const refreshActiveComputeBtn = document.getElementById('refreshActiveComputeBtn');
-    if (refreshActiveComputeBtn) {
-        refreshActiveComputeBtn.addEventListener('click', () => {
-            loadActiveComputeEntries();
-        });
-    }
-    
-    // Iniciar verificación de autenticación
+    // Iniciar la aplicación
     checkAuth();
     
     // Event listener para el botón de búsqueda general (se añade dinámicamente)
