@@ -14,11 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const navRegistrarEntrada = document.getElementById('navRegistrarEntrada');
     const navEntradasActivas = document.getElementById('navEntradasActivas');
     const navConsultas = document.getElementById('navConsultas');
+    const navEstadisticas = document.getElementById('navEstadisticas');
+    const navEstadisticasItem = document.getElementById('navEstadisticasItem');
     
     // Secciones
     const registrarEntradaSection = document.getElementById('registrarEntradaSection');
     const entradasActivasSection = document.getElementById('entradasActivasSection');
     const consultasSection = document.getElementById('consultasSection');
+    const estadisticasSection = document.getElementById('estadisticasSection');
     
     // Formularios
     const searchStudentForm = document.getElementById('searchStudentForm');
@@ -228,30 +231,79 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Mostrar una sección específica
     const showSection = (section) => {
+        if (!section) {
+            console.error('Error: La sección no existe');
+            return;
+        }
+        
         // Ocultar todas las secciones
-        registrarEntradaSection.classList.add('d-none');
-        entradasActivasSection.classList.add('d-none');
-        consultasSection.classList.add('d-none');
+        if (registrarEntradaSection) registrarEntradaSection.classList.add('d-none');
+        if (entradasActivasSection) entradasActivasSection.classList.add('d-none');
+        if (consultasSection) consultasSection.classList.add('d-none');
+        if (estadisticasSection) estadisticasSection.classList.add('d-none');
         
         // Desactivar todos los enlaces de navegación
-        navRegistrarEntrada.classList.remove('active');
-        navEntradasActivas.classList.remove('active');
-        navConsultas.classList.remove('active');
+        if (navRegistrarEntrada) navRegistrarEntrada.classList.remove('active');
+        if (navEntradasActivas) navEntradasActivas.classList.remove('active');
+        if (navConsultas) navConsultas.classList.remove('active');
+        if (navEstadisticas) navEstadisticas.classList.remove('active');
         
         // Mostrar la sección solicitada
         section.classList.remove('d-none');
         
         // Activar el enlace correspondiente
-        if (section === registrarEntradaSection) {
+        if (section === registrarEntradaSection && navRegistrarEntrada) {
             navRegistrarEntrada.classList.add('active');
             // Ocultar info de estudiante cuando cambiamos a esta sección
-            studentInfo.classList.add('d-none');
-            searchStudentForm.reset();
-        } else if (section === entradasActivasSection) {
+            if (studentInfo) studentInfo.classList.add('d-none');
+            if (searchStudentForm) searchStudentForm.reset();
+        } else if (section === entradasActivasSection && navEntradasActivas) {
             navEntradasActivas.classList.add('active');
             loadActiveEntries(); // Cargar entradas activas
-        } else if (section === consultasSection) {
+        } else if (section === consultasSection && navConsultas) {
             navConsultas.classList.add('active');
+            // Inicializar fechas para consulta
+            const today = new Date();
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(today.getDate() - 7);
+            
+            const fechaInicio = document.getElementById('fechaInicio');
+            const fechaFin = document.getElementById('fechaFin');
+            
+            if (fechaInicio) fechaInicio.value = oneWeekAgo.toISOString().split('T')[0];
+            if (fechaFin) fechaFin.value = today.toISOString().split('T')[0];
+        } else if (section === estadisticasSection && navEstadisticas) {
+            navEstadisticas.classList.add('active');
+            // Inicializar fechas y años para los formularios de estadísticas
+            const today = new Date();
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+            
+            // Inicializar fechas para estadísticas por programa
+            const estProgFechaInicio = document.getElementById('estProgFechaInicio');
+            const estProgFechaFin = document.getElementById('estProgFechaFin');
+            
+            if (estProgFechaInicio) estProgFechaInicio.value = oneMonthAgo.toISOString().split('T')[0];
+            if (estProgFechaFin) estProgFechaFin.value = today.toISOString().split('T')[0];
+            
+            // Inicializar fechas para estadísticas semanales
+            const estSemanalFechaInicio = document.getElementById('estSemanalFechaInicio');
+            const estSemanalFechaFin = document.getElementById('estSemanalFechaFin');
+            
+            if (estSemanalFechaInicio) estSemanalFechaInicio.value = oneMonthAgo.toISOString().split('T')[0];
+            if (estSemanalFechaFin) estSemanalFechaFin.value = today.toISOString().split('T')[0];
+            
+            // Inicializar selector de años para estadísticas mensuales
+            const yearSelect = document.getElementById('estMensualYear');
+            if (yearSelect && yearSelect.options.length === 0) { // Solo llenar si está vacío
+                const currentYear = today.getFullYear();
+                for (let year = currentYear; year >= currentYear - 5; year--) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                }
+            }
         }
     };
     
@@ -890,6 +942,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showSection(consultasSection);
     });
     
+    // Event listener para la sección de estadísticas
+    if (navEstadisticas) {
+        navEstadisticas.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection(estadisticasSection);
+        });
+    }
+    
     // Buscar y registrar estudiante
     searchStudentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -973,6 +1033,317 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Botón de búsqueda por término
     searchTermBtn.addEventListener('click', searchEntries);
+    
+    // Botón de exportación a Excel en la sección de consultas
+    if (document.getElementById('exportConsultasExcel')) {
+        document.getElementById('exportConsultasExcel').addEventListener('click', async () => {
+            // Obtener los parámetros de filtro actuales
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            const sede = document.getElementById('sedeFecha').value;
+            const searchTerm = document.getElementById('searchTerm')?.value || '';
+            
+            try {
+                // Mostrar indicador de carga
+                Swal.fire({
+                    title: 'Generando Excel',
+                    text: 'Por favor espere mientras se genera el archivo...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Llamar al servicio de estadísticas para exportar a Excel
+                const response = await statsService.exportToExcel('consultas', {
+                    fechaInicio,
+                    fechaFin,
+                    sede,
+                    searchTerm
+                });
+                
+                // La función exportToExcel ya maneja la descarga y los mensajes
+            } catch (error) {
+                console.error('Error al exportar consultas a Excel:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión con el servidor'
+                });
+            }
+        });
+    }
+    
+    // Manejadores de eventos para los formularios de estadísticas
+    if (document.getElementById('estProgramasForm')) {
+        document.getElementById('estProgramasForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fechaInicio = document.getElementById('estProgFechaInicio').value;
+            const fechaFin = document.getElementById('estProgFechaFin').value;
+            const sede = document.getElementById('estProgSede').value;
+            
+            try {
+                // Mostrar indicador de carga
+                Swal.fire({
+                    title: 'Generando estadísticas',
+                    text: 'Por favor espere...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                const response = await statsService.getStatsByProgram(fechaInicio, fechaFin, sede);
+                
+                Swal.close();
+                
+                if (response.status === 'success') {
+                    statsService.renderProgramChart(response.data);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Error al obtener estadísticas'
+                    });
+                }
+            } catch (error) {
+                console.error('Error al generar estadísticas por programa:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión con el servidor'
+                });
+            }
+        });
+        
+        // Exportar a Excel - Programas
+        document.getElementById('exportProgExcel').addEventListener('click', async () => {
+            const fechaInicio = document.getElementById('estProgFechaInicio').value;
+            const fechaFin = document.getElementById('estProgFechaFin').value;
+            const sede = document.getElementById('estProgSede').value;
+            
+            try {
+                Swal.fire({
+                    title: 'Generando Excel',
+                    text: 'Por favor espere...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                const response = await statsService.exportToExcel('programas', {
+                    fechaInicio,
+                    fechaFin,
+                    sede
+                });
+                
+                Swal.close();
+                
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Excel Generado',
+                        text: 'El archivo Excel se ha generado correctamente',
+                        footer: `<a href="${response.file_url}" target="_blank" class="btn btn-success">Descargar Excel</a>`
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Error al generar Excel'
+                    });
+                }
+            } catch (error) {
+                console.error('Error al exportar a Excel:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión con el servidor'
+                });
+            }
+        });
+    }
+    
+    // Estadísticas mensuales
+    if (document.getElementById('estMensualForm')) {
+        document.getElementById('estMensualForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const year = document.getElementById('estMensualYear').value;
+            const sede = document.getElementById('estMensualSede').value;
+            
+            try {
+                Swal.fire({
+                    title: 'Generando estadísticas',
+                    text: 'Por favor espere...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                const response = await statsService.getMonthlyStats(year, sede);
+                
+                Swal.close();
+                
+                if (response.status === 'success') {
+                    statsService.renderMonthlyChart(response.data);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Error al obtener estadísticas'
+                    });
+                }
+            } catch (error) {
+                console.error('Error al generar estadísticas mensuales:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión con el servidor'
+                });
+            }
+        });
+        
+        // Exportar a Excel - Mensual
+        document.getElementById('exportMensualExcel').addEventListener('click', async () => {
+            const year = document.getElementById('estMensualYear').value;
+            const sede = document.getElementById('estMensualSede').value;
+            
+            try {
+                Swal.fire({
+                    title: 'Generando Excel',
+                    text: 'Por favor espere...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                const response = await statsService.exportToExcel('mensual', {
+                    year,
+                    sede
+                });
+                
+                Swal.close();
+                
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Excel Generado',
+                        text: 'El archivo Excel se ha generado correctamente',
+                        footer: `<a href="${response.file_url}" target="_blank" class="btn btn-success">Descargar Excel</a>`
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Error al generar Excel'
+                    });
+                }
+            } catch (error) {
+                console.error('Error al exportar a Excel:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión con el servidor'
+                });
+            }
+        });
+    }
+    
+    // Estadísticas semanales
+    if (document.getElementById('estSemanalForm')) {
+        document.getElementById('estSemanalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fechaInicio = document.getElementById('estSemanalFechaInicio').value;
+            const fechaFin = document.getElementById('estSemanalFechaFin').value;
+            const sede = document.getElementById('estSemanalSede').value;
+            
+            try {
+                Swal.fire({
+                    title: 'Generando estadísticas',
+                    text: 'Por favor espere...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                const response = await statsService.getWeeklyStats(fechaInicio, fechaFin, sede);
+                
+                Swal.close();
+                
+                if (response.status === 'success') {
+                    statsService.renderWeeklyChart(response.data);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Error al obtener estadísticas'
+                    });
+                }
+            } catch (error) {
+                console.error('Error al generar estadísticas semanales:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión con el servidor'
+                });
+            }
+        });
+        
+        // Exportar a Excel - Semanal
+        document.getElementById('exportSemanalExcel').addEventListener('click', async () => {
+            const fechaInicio = document.getElementById('estSemanalFechaInicio').value;
+            const fechaFin = document.getElementById('estSemanalFechaFin').value;
+            const sede = document.getElementById('estSemanalSede').value;
+            
+            try {
+                Swal.fire({
+                    title: 'Generando Excel',
+                    text: 'Por favor espere...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                const response = await statsService.exportToExcel('semanal', {
+                    fechaInicio,
+                    fechaFin,
+                    sede
+                });
+                
+                Swal.close();
+                
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Excel Generado',
+                        text: 'El archivo Excel se ha generado correctamente',
+                        footer: `<a href="${response.file_url}" target="_blank" class="btn btn-success">Descargar Excel</a>`
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Error al generar Excel'
+                    });
+                }
+            } catch (error) {
+                console.error('Error al exportar a Excel:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión con el servidor'
+                });
+            }
+        });
+    }
     
     // Iniciar la aplicación
     checkAuth();

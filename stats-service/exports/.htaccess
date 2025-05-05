@@ -1,0 +1,7 @@
+Options +Indexes
+Order allow,deny
+Allow from all
+<FilesMatch "\.xlsx$">
+    Header set Content-Disposition "attachment"
+    Header set Content-Type "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+</FilesMatch>

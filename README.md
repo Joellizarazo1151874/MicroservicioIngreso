@@ -1,9 +1,10 @@
 # BECL - Sistema de Microservicios
 
-Este proyecto consiste en dos microservicios independientes para el sistema BECL:
+Este proyecto consiste en tres microservicios independientes para el sistema BECL:
 
 1. **Microservicio de Autenticación**: Gestión de usuarios y autenticación mediante JWT.
 2. **Microservicio de Registro de Entradas**: Gestión de entradas y salidas de estudiantes.
+3. **Microservicio de Estadísticas y Reportes**: Generación de estadísticas y exportación de datos a Excel.
 
 Además, incluye una aplicación web para probar las funcionalidades de los microservicios.
 
@@ -13,6 +14,7 @@ Además, incluye una aplicación web para probar las funcionalidades de los micr
 microservicio/
 ├── auth-service/      # Microservicio de Autenticación
 ├── entry-service/     # Microservicio de Registro de Entradas
+├── stats-service/     # Microservicio de Estadísticas y Reportes
 ├── web-app/           # Aplicación Web
 └── docker/            # Configuración Docker para la base de datos
 ```
@@ -72,6 +74,14 @@ Alias /microservicio/entry-service /ruta/a/microservicio/entry-service
     Require all granted
 </Directory>
 
+# Microservicio de Estadísticas y Reportes
+Alias /microservicio/stats-service /ruta/a/microservicio/stats-service
+<Directory /ruta/a/microservicio/stats-service>
+    Options -Indexes +FollowSymLinks
+    AllowOverride All
+    Require all granted
+</Directory>
+
 # Aplicación Web
 Alias /microservicio/web-app /ruta/a/microservicio/web-app
 <Directory /ruta/a/microservicio/web-app>
@@ -98,6 +108,14 @@ Endpoints disponibles:
 - `GET /entries/active` - Obtener entradas activas
 - `GET /entries/by-date` - Obtener entradas por fecha
 - `GET /entries/search` - Buscar entradas
+
+### Microservicio de Estadísticas y Reportes
+
+Endpoints disponibles:
+- `GET /estadisticas/programas` - Estadísticas por programas académicos
+- `GET /estadisticas/mensual` - Estadísticas mensuales
+- `GET /estadisticas/semanal` - Estadísticas semanales
+- `GET /reportes/excel` - Exportar datos a Excel
 
 ### Aplicación Web
 
