@@ -72,10 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
         registrarEntradaSection.classList.add('d-none');
         entradasActivasSection.classList.add('d-none');
         consultasSection.classList.add('d-none');
+        estadisticasSection.classList.add('d-none');
         
         navRegistrarEntrada.parentElement.classList.add('d-none');
         navEntradasActivas.parentElement.classList.add('d-none');
         navConsultas.parentElement.classList.add('d-none');
+        navEstadisticasItem.classList.add('d-none'); // Ocultar el elemento de estadísticas por defecto
         
         // Configurar según el usuario
         if (username === 'entradabecl') {
@@ -130,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
             navRegistrarEntrada.parentElement.classList.add('d-none');
             navEntradasActivas.parentElement.classList.remove('d-none');
             navConsultas.parentElement.classList.remove('d-none');
+            navEstadisticasItem.classList.remove('d-none'); // Mostrar el elemento de estadísticas solo para adminbecl
             
             // Activar la sección de consultas por defecto
             navConsultas.classList.add('active');
