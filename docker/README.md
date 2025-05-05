@@ -1,11 +1,27 @@
 # Microservicios BECL - Entorno Docker
 
-Este directorio contiene la configuración de Docker para el entorno de desarrollo de los microservicios BECL.
+Este directorio contiene la configuración de Docker para el entorno de desarrollo de los microservicios BECL, con soporte para múltiples bases de datos.
 
 ## Requisitos
 
 - Docker
 - Docker Compose
+
+## Estructura de Bases de Datos
+
+El sistema utiliza tres bases de datos independientes:
+
+1. **becl_admin**: Base de datos principal que contiene:
+   - Tabla `becl_registro`: Registros de entrada/salida de estudiantes
+   - Tabla `vista_borrowers`: Información de estudiantes
+   - Tabla `vista_authorised_value`: Valores autorizados del sistema
+
+2. **becl_autenticacion**: Base de datos para el servicio de autenticación
+   - Contiene las tablas relacionadas con usuarios y autenticación
+
+3. **becl_computo**: Base de datos para el servicio de cómputo
+   - Tabla `becl_equipo`: Información de equipos de cómputo
+   - Tabla `becl_registro_computo`: Registros de uso de equipos
 
 ## Instrucciones de uso
 
@@ -17,20 +33,29 @@ docker-compose up -d
 ```
 
 Esto iniciará los siguientes servicios:
-- MySQL (puerto 3306)
+- MySQL (puerto 3306) con las tres bases de datos
 - phpMyAdmin (puerto 8080)
 
-### 2. Acceder a phpMyAdmin
+### 2. Acceder a la aplicación y phpMyAdmin
 
-- URL: http://localhost/microservicio/web-app
-- Usuario: root
-- Contraseña: root
+- Aplicación web: http://localhost/microservicio/web-app
+- phpMyAdmin: http://localhost:8080
+  - Usuario: root
+  - Contraseña: root
 
-### 3. Configurar los microservicios
+### 3. Configuración de los microservicios
 
-Editar los archivos `config.php` de los microservicios para que apunten a la base de datos en Docker:
+Los archivos `config.php` de cada microservicio ya están configurados para apuntar a su respectiva base de datos:
 
-Para el microservicio de autenticación (`auth-service/config.php`):
+**Microservicio de autenticación** (`auth-service/config.php`):
+```php
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', 'root');
+define('DB_NAME', 'becl_autenticacion');
+```
+
+**Microservicio de registro de entradas** (`entry-service/config.php`):
 ```php
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
@@ -38,12 +63,12 @@ define('DB_PASS', 'root');
 define('DB_NAME', 'becl_admin');
 ```
 
-Para el microservicio de registro de entradas (`entry-service/config.php`):
+**Microservicio de cómputo** (`computo-service/config.php`):
 ```php
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', 'root');
-define('DB_NAME', 'becl_admin');
+define('DB_NAME', 'becl_computo');
 ```
 
 ### 4. Detener los servicios

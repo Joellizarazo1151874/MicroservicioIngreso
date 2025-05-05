@@ -1,12 +1,39 @@
 # BECL - Sistema de Microservicios
 
-Este proyecto consiste en tres microservicios independientes para el sistema BECL:
+Este proyecto implementa una arquitectura de microservicios para el sistema BECL, con cuatro servicios independientes:
 
-1. **Microservicio de Autenticación**: Gestión de usuarios y autenticación mediante JWT.
-2. **Microservicio de Registro de Entradas**: Gestión de entradas y salidas de estudiantes.
-3. **Microservicio de Estadísticas y Reportes**: Generación de estadísticas y exportación de datos a Excel.
+1. **Microservicio de Autenticación** (`auth-service`): Gestión de usuarios y autenticación mediante JWT.
+2. **Microservicio de Registro de Entradas** (`entry-service`): Gestión de entradas y salidas de estudiantes en la biblioteca.
+3. **Microservicio de Cómputo** (`computo-service`): Gestión de préstamos de equipos de cómputo a estudiantes.
+4. **Microservicio de Estadísticas** (`stats-service`): Generación de estadísticas y exportación de datos a Excel.
 
-Además, incluye una aplicación web para probar las funcionalidades de los microservicios.
+Además, incluye una aplicación web unificada para interactuar con todos los microservicios.
+
+## Arquitectura del Sistema
+
+### Microservicios
+
+Cada microservicio es independiente y tiene su propia responsabilidad:
+
+- **auth-service**: Maneja la autenticación de usuarios con diferentes roles (adminbecl, entradabecl, entradabecle, computobecl).
+- **entry-service**: Gestiona los registros de entrada/salida de estudiantes a la biblioteca.
+- **computo-service**: Administra la asignación y liberación de equipos de cómputo a estudiantes.
+- **stats-service**: Genera reportes y estadísticas basados en los datos de los demás servicios.
+
+### Bases de Datos
+
+El sistema utiliza tres bases de datos independientes:
+
+1. **becl_admin**: Base de datos principal
+   - Contiene información de estudiantes y registros de entrada/salida
+   - Tablas: `becl_registro`, `vista_borrowers`, `vista_authorised_value`
+
+2. **becl_autenticacion**: Base de datos para autenticación
+   - Gestiona usuarios y sus roles en el sistema
+
+3. **becl_computo**: Base de datos para el servicio de cómputo
+   - Gestiona equipos y sus préstamos
+   - Tablas: `becl_equipo`, `becl_registro_computo`
 
 ## Estructura del Proyecto
 
@@ -14,9 +41,10 @@ Además, incluye una aplicación web para probar las funcionalidades de los micr
 microservicio/
 ├── auth-service/      # Microservicio de Autenticación
 ├── entry-service/     # Microservicio de Registro de Entradas
+├── computo-service/   # Microservicio de Gestión de Equipos
 ├── stats-service/     # Microservicio de Estadísticas y Reportes
-├── web-app/           # Aplicación Web
-└── docker/            # Configuración Docker para la base de datos
+├── web-app/           # Aplicación Web unificada
+└── docker/            # Configuración Docker y archivos SQL
 ```
 
 ## Requisitos
@@ -24,7 +52,7 @@ microservicio/
 - PHP 7.4 o superior
 - MySQL 5.7 o superior
 - Servidor web (Apache, Nginx)
-- Docker y Docker Compose (para el entorno de desarrollo)
+- Docker y Docker Compose (opcional, para entorno de desarrollo)
 
 ## Instrucciones de Instalación
 
@@ -35,19 +63,23 @@ git clone <URL-del-repositorio>
 cd microservicio
 ```
 
-### 2. Configurar la base de datos
+### 2. Configurar las bases de datos
 
-Opción 1: Utilizando Docker:
+**Opción 1**: Utilizando Docker (recomendado):
 ```bash
 cd docker
 docker-compose up -d
 ```
+Esto creará automáticamente las tres bases de datos necesarias con todos sus datos.
 
-Opción 2: Configurar manualmente:
-- Crear una base de datos MySQL llamada `becl_admin`
-- Importar el archivo `docker/init.sql`
+**Opción 2**: Configuración manual:
+- Crear las bases de datos: `becl_admin`, `becl_autenticacion` y `becl_computo`
+- Importar los archivos SQL correspondientes desde la carpeta `docker`:
+  - `becl_admin.sql` para la base de datos `becl_admin`
+  - `becl_autenticacion.sql` para la base de datos `becl_autenticacion`
+  - `becl_computo.sql` para la base de datos `becl_computo`
 
-### 3. Configurar los microservicios
+### 3. Configurar el servidor web
 
 Editar los archivos `config.php` de ambos microservicios con la configuración correcta de la base de datos.
 

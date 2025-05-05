@@ -23,7 +23,7 @@ class Entry {
             
             // Verificamos si la tabla vista_borrowers existe
             if (!in_array('vista_borrowers', $tables)) {
-                error_log("¡ERROR: La tabla vista_borrowers no existe!");
+                error_log("\u00a1ERROR: La tabla vista_borrowers no existe!");
                 return false;
             }
             

@@ -1,84 +1,34 @@
 <?php
 require_once 'db.php';
+require_once 'cross_db.php';
 
 class Computo {
-    private $conn;
+    private $conn;       // Conexión a la base de datos de cómputo
+    private $cross_db;   // Objeto para manejar conexiones cruzadas entre bases de datos
     
     public function __construct() {
+        // Inicializar la conexión principal a la base de datos de cómputo
         $database = new Database();
         $this->conn = $database->getConnection();
+        
+        // Inicializar el objeto para manejar conexiones cruzadas
+        $this->cross_db = new CrossDBConnection();
     }
     
     // Buscar estudiante por código (cardnumber) en vista_borrowers con información de facultad y programa
     public function findStudentByCode($code) {
         try {
-            // Verificamos si las tablas necesarias existen
-            $tables_query = "SHOW TABLES";
-            $tables_stmt = $this->conn->prepare($tables_query);
-            $tables_stmt->execute();
-            $tables = $tables_stmt->fetchAll(PDO::FETCH_COLUMN);
+            // Usar la conexión cruzada para buscar estudiantes en la base de datos original
+            $student = $this->cross_db->findStudentByCode($code);
             
-            if (!in_array('vista_borrowers', $tables)) {
-                error_log("La tabla vista_borrowers no existe");
-                return false;
+            // Registrar el resultado en el log para depuración
+            if ($student) {
+                error_log("Estudiante encontrado en la base de datos original: " . $student['firstname'] . ' ' . $student['surname']);
+            } else {
+                error_log("No se encontró el estudiante con código: $code en la base de datos original");
             }
             
-            if (!in_array('vista_authorised_values', $tables)) {
-                error_log("La tabla vista_authorised_values no existe, usando consulta básica");
-                // Si no existe la tabla de valores autorizados, usamos la consulta original
-                $query = "SELECT * FROM vista_borrowers WHERE cardnumber = ?";
-                $stmt = $this->conn->prepare($query);
-                $stmt->execute([$code]);
-                
-                if ($stmt->rowCount() > 0) {
-                    return $stmt->fetch();
-                }
-                
-                // Intentar con LIKE
-                $query = "SELECT * FROM vista_borrowers WHERE cardnumber LIKE ?";
-                $stmt = $this->conn->prepare($query);
-                $stmt->execute(["%$code%"]);
-                
-                if ($stmt->rowCount() > 0) {
-                    return $stmt->fetch();
-                }
-                
-                return false;
-            }
-            
-            // Consulta mejorada que incluye facultad y programa desde vista_authorised_values
-            $query = "SELECT vb.*, 
-                     S.lib AS programa, 
-                     vav.lib AS facultad 
-                     FROM vista_borrowers vb 
-                     LEFT JOIN vista_authorised_values S ON vb.sort2 = S.authorised_value 
-                     LEFT JOIN vista_authorised_values vav ON vb.sort1 = vav.authorised_value 
-                     WHERE vb.cardnumber = ?";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([$code]);
-            
-            if ($stmt->rowCount() > 0) {
-                return $stmt->fetch();
-            }
-            
-            // Si no encontramos nada, intentamos con LIKE por si acaso
-            $query = "SELECT vb.*, 
-                     S.lib AS programa, 
-                     vav.lib AS facultad 
-                     FROM vista_borrowers vb 
-                     LEFT JOIN vista_authorised_values S ON vb.sort2 = S.authorised_value 
-                     LEFT JOIN vista_authorised_values vav ON vb.sort1 = vav.authorised_value 
-                     WHERE vb.cardnumber LIKE ?";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute(["%$code%"]);
-            
-            if ($stmt->rowCount() > 0) {
-                return $stmt->fetch();
-            }
-            
-            return false;
+            return $student;
         } catch (PDOException $e) {
             error_log("Error en findStudentByCode: " . $e->getMessage());
             return false;

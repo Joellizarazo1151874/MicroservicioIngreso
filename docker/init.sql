@@ -1,130 +1,20 @@
--- Seleccionar base de datos
+-- Crear y seleccionar la base de datos becl_admin
+CREATE DATABASE IF NOT EXISTS becl_admin;
 USE becl_admin;
 
--- Crear tabla de administradores
-CREATE TABLE `becl_admin` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `usuario` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL,
-  `nivel` varchar(50) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Importar el contenido del archivo becl_admin.sql
+SOURCE /docker-entrypoint-initdb.d/becl_admin.sql;
 
--- Insertar usuarios de prueba
-INSERT INTO `becl_admin` (`id`, `usuario`, `password`, `nivel`) VALUES
-(1, 'adminbecl', '268837dc8ffbb35b71dee6212d7ae1ad7f0c7149', 'admin'),
-(2, 'entradabecl', '268837dc8ffbb35b71dee6212d7ae1ad7f0c7149', 'entrada'),
-(3, 'entradabecle', 'c2781510b104170bf6635b6fc4886458c045c134', 'entrada'),
-(4, 'computobecl', '4f0e770acf6c56bb3ce560dbce4ffa0a1b4a8bc0', 'entrada');
+-- Crear y seleccionar la base de datos becl_autenticacion
+CREATE DATABASE IF NOT EXISTS becl_autenticacion;
+USE becl_autenticacion;
 
--- Crear tabla de registro de entradas
-CREATE TABLE `becl_registro` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) NOT NULL,
-  `correo` varchar(100) NOT NULL,
-  `codigo` varchar(20) DEFAULT NULL,
-  `programa` varchar(100) DEFAULT NULL,
-  `facultad` varchar(100) DEFAULT NULL,
-  `entrada` datetime NOT NULL,
-  `salida` datetime DEFAULT NULL,
-  `sede` varchar(50) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `correo_idx` (`correo`),
-  KEY `codigo_idx` (`codigo`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Importar el contenido del archivo becl_autenticacion.sql
+SOURCE /docker-entrypoint-initdb.d/becl_autenticacion.sql;
 
--- Crear tabla de vista_borrowers
-CREATE TABLE `vista_borrowers` (
-  `borrowernumber` int(5) DEFAULT NULL,
-  `cardnumber` varchar(16) DEFAULT NULL,
-  `surname` varchar(33) DEFAULT NULL,
-  `firstname` varchar(37) DEFAULT NULL,
-  `middle_name` varchar(8) DEFAULT NULL,
-  `title` varchar(4) DEFAULT NULL,
-  `othernames` varchar(15) DEFAULT NULL,
-  `initials` varchar(11) DEFAULT NULL,
-  `pronouns` varchar(10) DEFAULT NULL,
-  `streetnumber` varchar(10) DEFAULT NULL,
-  `streettype` varchar(10) DEFAULT NULL,
-  `address` varchar(87) DEFAULT NULL,
-  `address2` varchar(93) DEFAULT NULL,
-  `city` varchar(7) DEFAULT NULL,
-  `state` varchar(18) DEFAULT NULL,
-  `zipcode` varchar(6) DEFAULT NULL,
-  `country` varchar(9) DEFAULT NULL,
-  `email` varchar(50) DEFAULT NULL,
-  `phone` varchar(15) DEFAULT NULL,
-  `mobile` varchar(27) DEFAULT NULL,
-  `fax` varchar(10) DEFAULT NULL,
-  `emailpro` varchar(54) DEFAULT NULL,
-  `phonepro` varchar(14) DEFAULT NULL,
-  `B_streetnumber` varchar(10) DEFAULT NULL,
-  `B_streettype` varchar(10) DEFAULT NULL,
-  `B_address` varchar(40) DEFAULT NULL,
-  `B_address2` varchar(10) DEFAULT NULL,
-  `B_city` varchar(7) DEFAULT NULL,
-  `B_state` varchar(10) DEFAULT NULL,
-  `B_zipcode` varchar(10) DEFAULT NULL,
-  `B_country` varchar(8) DEFAULT NULL,
-  `B_email` varchar(26) DEFAULT NULL,
-  `B_phone` varchar(10) DEFAULT NULL,
-  `dateofbirth` varchar(10) DEFAULT NULL,
-  `branchcode` varchar(4) DEFAULT NULL,
-  `categorycode` varchar(4) DEFAULT NULL,
-  `dateenrolled` varchar(10) DEFAULT NULL,
-  `dateexpiry` varchar(10) DEFAULT NULL,
-  `password_expiration_date` varchar(10) DEFAULT NULL,
-  `date_renewed` varchar(10) DEFAULT NULL,
-  `gonenoaddress` varchar(1) DEFAULT NULL,
-  `lost` varchar(1) DEFAULT NULL,
-  `debarred` varchar(10) DEFAULT NULL,
-  `debarredcomment` varchar(212) DEFAULT NULL,
-  `contactname` varchar(41) DEFAULT NULL,
-  `contactfirstname` varchar(10) DEFAULT NULL,
-  `contacttitle` varchar(10) DEFAULT NULL,
-  `borrowernotes` varchar(49) DEFAULT NULL,
-  `relationship` varchar(10) DEFAULT NULL,
-  `ethnicity` varchar(10) DEFAULT NULL,
-  `ethnotes` varchar(10) DEFAULT NULL,
-  `sex` varchar(1) DEFAULT NULL,
-  `password` varchar(60) DEFAULT NULL,
-  `secret` varchar(10) DEFAULT NULL,
-  `auth_method` varchar(8) DEFAULT NULL,
-  `flags` varchar(9) DEFAULT NULL,
-  `userid` varchar(31) DEFAULT NULL,
-  `opacnote` varchar(49) DEFAULT NULL,
-  `contactnote` varchar(10) DEFAULT NULL,
-  `sort1` varchar(49) DEFAULT NULL,
-  `sort2` varchar(74) DEFAULT NULL,
-  `altcontactfirstname` varchar(30) DEFAULT NULL,
-  `altcontactsurname` varchar(10) DEFAULT NULL,
-  `altcontactaddress1` varchar(35) DEFAULT NULL,
-  `altcontactaddress2` varchar(10) DEFAULT NULL,
-  `altcontactaddress3` varchar(6) DEFAULT NULL,
-  `altcontactstate` varchar(10) DEFAULT NULL,
-  `altcontactzipcode` varchar(10) DEFAULT NULL,
-  `altcontactcountry` varchar(8) DEFAULT NULL,
-  `altcontactphone` varchar(7) DEFAULT NULL,
-  `smsalertnumber` varchar(10) DEFAULT NULL,
-  `sms_provider_id` varchar(10) DEFAULT NULL,
-  `privacy` int(1) DEFAULT NULL,
-  `privacy_guarantor_fines` int(1) DEFAULT NULL,
-  `privacy_guarantor_checkouts` int(1) DEFAULT NULL,
-  `checkprevcheckout` varchar(7) DEFAULT NULL,
-  `updated_on` varchar(19) DEFAULT NULL,
-  `lastseen` varchar(10) DEFAULT NULL,
-  `lang` varchar(7) DEFAULT NULL,
-  `login_attempts` int(2) DEFAULT NULL,
-  `overdrive_auth_token` varchar(10) DEFAULT NULL,
-  `anonymized` int(1) DEFAULT NULL,
-  `autorenew_checkouts` int(1) DEFAULT NULL,
-  `primary_contact_method` varchar(6) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+-- Crear y seleccionar la base de datos becl_computo
+CREATE DATABASE IF NOT EXISTS becl_computo;
+USE becl_computo;
 
--- Insertar datos de prueba para vista_borrowers
-INSERT INTO `vista_borrowers` (`borrowernumber`, `cardnumber`, `surname`, `firstname`, `middle_name`, `title`, `othernames`, `initials`, `pronouns`, `streetnumber`, `streettype`, `address`, `address2`, `city`, `state`, `zipcode`, `country`, `email`, `phone`, `mobile`, `fax`, `emailpro`, `phonepro`, `B_streetnumber`, `B_streettype`, `B_address`, `B_address2`, `B_city`, `B_state`, `B_zipcode`, `B_country`, `B_email`, `B_phone`, `dateofbirth`, `branchcode`, `categorycode`, `dateenrolled`, `dateexpiry`, `password_expiration_date`, `date_renewed`, `gonenoaddress`, `lost`, `debarred`, `debarredcomment`, `contactname`, `contactfirstname`, `contacttitle`, `borrowernotes`, `relationship`, `ethnicity`, `ethnotes`, `sex`, `password`, `secret`, `auth_method`, `flags`, `userid`, `opacnote`, `contactnote`, `sort1`, `sort2`, `altcontactfirstname`, `altcontactsurname`, `altcontactaddress1`, `altcontactaddress2`, `altcontactaddress3`, `altcontactstate`, `altcontactzipcode`, `altcontactcountry`, `altcontactphone`, `smsalertnumber`, `sms_provider_id`, `privacy`, `privacy_guarantor_fines`, `privacy_guarantor_checkouts`, `checkprevcheckout`, `updated_on`, `lastseen`, `lang`, `login_attempts`, `overdrive_auth_token`, `anonymized`, `autorenew_checkouts`, `primary_contact_method`) VALUES
-(57, '01786', 'GUEVARA QUIROZ', 'SANDRA PATRICIA', '', '', '60322090', '', '', '', '', '', '', '', '', '', '', 'sandrapatriciagq@ufps.edu.co', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'BECL', 'S', '2014-12-11', '2030-08-31', '', '', '0', '0', '', '', '', '', '', '', '', '', '', 'F', '$2a$08$y6dnJpaeVaixI/jB4mKAZu.ODflaONy8s1LQENvgVUX4rC6lK.RNK', '', 'password', '536870916', '1786', '', '', '25Y', '7X', '', '', '', '', '', '', '', '', '', '', '', 1, 0, 0, 'inherit', '2024-09-16 11:59:56', '', 'default', 0, '', 0, 1, ''),
-(62, '03796', 'RIVERA GONZALEZ', 'OSCAR GERMAN', '', '', '13451429', '', '', '', '', '', '', 'CÚCUTA', 'NORTE DE SANTANDER', '', 'COLOMBIA', 'oscargermanrg@ufps.edu.co', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'BFCS', 'S', '2014-12-11', '2023-12-29', '', '', '0', '0', '', '', '', '', '', '', '', '', '', 'M', '$2a$08$oGyrR4kzHmnyP/L6YEKXJ.vrd/NQRd2A.Q55OuSsLR/GYZ0wsj98O', '', 'password', '536889350', 'Oscarg', '', '', '25Y', '1X', '', '', '', '', '', '', '', '', '', '', '', 1, 0, 0, 'inherit', '2024-09-12 8:32:52', '', 'default', 0, '', 0, 1, ''),
-(64, '04547', 'RANGEL DE PIZZA', 'BELSY', '', '', '', '', '', '', '', '', '', 'CÚCUTA', 'NORTE DE SANTANDER', '', 'COLOMBIA', 'belsyrp@ufps.edu.co', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'BECL', 'S', '2014-12-11', '2023-12-29', '', '', '0', '0', '', '', '', '', '', '', '', '', '', 'F', '$2a$08$aGSu9kSAQXwA9nhKVUB5AOCF3DFh4qbk5cxDqg6S/JAd17rjHRmHO', '', 'password', '536889348', 'Belsy', '', '', '25Y', '1X', '', '', '', '', '', '', '', '', '', '', '', 1, 0, 0, 'inherit', '2024-09-06 13:44:56', '', 'default', 0, '', 0, 1, ''),
-(66, '05005', 'VEGA YANEZ', 'EFRAIN LEONARDO', '', '', '88263917', '', '', 'Calle 21', '', 'Calle m232 - 41', '', 'CÚCUTA', 'NORTE DE SANTANDER', '', 'COLOMBIA', 'efrainleonardovy@ufps.edu.co', '', '', '', '', '3228554702', '', '', '', '', '', '', '', '', '', '', '', 'BECL', 'S', '2014-12-11', '2023-12-29', '', '', '0', '0', '', '', '', '', '', '', '', '', '', 'M', '$2a$08$t6uWXV0jPAlUvBpvUqlCSOzPbFACSiocYK2.o6YxANeWjna0EWUsO', '', 'password', '675567620', 'Leonardo', '', '', '25Y', '1X', '', '', '', '', '', '', '', '', '', '', '', 1, 0, 0, 'inherit', '2024-09-06 13:44:56', '', 'default', 0, '', 0, 1, ''),
-(67, '05071', 'MARTINEZ PORRAS', 'JOSE LUIS', '', 'Mr', '88244533', '', '', '', '', 'calle 8 No. 5-56 B. Ceci', '', 'CÚCUTA', 'NORTE DE SANTANDER', '', 'COLOMBIA', 'joseluismp@ufps.edu.co', '5814944', '', '', '', '3204183367', '', '', '', '', '', '', '', '', '', '', '', 'BECL', 'S', '2014-12-11', '2024-07-26', '', '2023-09-16', '0', '0', '', '', '', '', '', '', '', '', '', 'M', '$2a$08$JvLoQXBr1I9EVY1Bx5EftOPtoT0TGwCntrZvGzU4bmVDEQpoTgyq2', '', 'password', '536887300', '5071', '', '', '25Y', '7X', '', '', '', '', '', '', '', '', '', '', '', 1, 0, 0, 'inherit', '2024-09-11 18:32:06', '', 'default', 9, '', 0, 1, ''); 
+-- Importar el contenido del archivo becl_computo.sql
+SOURCE /docker-entrypoint-initdb.d/becl_computo.sql;
