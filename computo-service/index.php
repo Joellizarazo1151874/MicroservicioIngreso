@@ -75,8 +75,8 @@ if ($method === 'GET' && $endpoint === 'student') {
                         'nombre' => $student['firstname'] . ' ' . $student['surname'],
                         'correo' => $student['email'],
                         'codigo' => $student['cardnumber'],
-                        'programa' => isset($student['programa']) ? $student['programa'] : ($student['sort2'] ?? ''),
-                        'facultad' => isset($student['facultad']) ? $student['facultad'] : ($student['sort1'] ?? '')
+                        'programa' => $student['carrera'] ?? '',
+                        'facultad' => $student['departamento'] ?? ''
                     ]
                 ];
             } else {

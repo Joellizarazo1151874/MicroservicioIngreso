@@ -14,15 +14,16 @@ class Statistics {
      * @param string|null $sede Sede para filtrar (opcional)
      * @param string|null $fechaInicio Fecha de inicio (opcional)
      * @param string|null $fechaFin Fecha de fin (opcional)
+     * @param string|null $programa Programa específico para filtrar (opcional)
      * @return array Estadísticas por programa
      */
-    public function getStatsByProgram($sede = null, $fechaInicio = null, $fechaFin = null) {
+    public function getStatsByProgram($sede = null, $fechaInicio = null, $fechaFin = null, $programa = null) {
         try {
             $params = [];
             $whereClause = "";
             
             // Construir cláusula WHERE según los filtros
-            if ($sede || $fechaInicio || $fechaFin) {
+            if ($sede || $fechaInicio || $fechaFin || $programa) {
                 $whereClause = " WHERE ";
                 $conditions = [];
                 
@@ -43,11 +44,16 @@ class Statistics {
                     $params[] = $fechaFin . " 23:59:59";
                 }
                 
+                if ($programa) {
+                    $conditions[] = "programa = ?";
+                    $params[] = $programa;
+                }
+                
                 $whereClause .= implode(" AND ", $conditions);
             }
             
-            // Consulta para obtener estadísticas por programa
-            $query = "SELECT programa, COUNT(*) as total 
+            // Consulta para obtener estadísticas por programa (usando carrera)
+            $query = "SELECT programa as carrera, COUNT(*) as total 
                      FROM becl_registro" . $whereClause . " 
                      GROUP BY programa 
                      ORDER BY total DESC";
@@ -62,7 +68,7 @@ class Statistics {
             $data = [];
             
             foreach ($result as $row) {
-                $labels[] = $row['programa'] ? $row['programa'] : 'No especificado';
+                $labels[] = $row['carrera'] ? $row['carrera'] : 'No especificado';
                 $data[] = (int)$row['total'];
             }
             
@@ -242,9 +248,10 @@ class Statistics {
                     $result = $this->getStatsByProgram(
                         $params['sede'] ?? null,
                         $params['fechaInicio'] ?? null,
-                        $params['fechaFin'] ?? null
+                        $params['fechaFin'] ?? null,
+                        $params['programa'] ?? null
                     );
-                    $headers = ['Programa', 'Total de Entradas'];
+                    $headers = ['Carrera', 'Total de Entradas'];
                     $data = $result['raw'];
                     break;
                     
@@ -285,7 +292,13 @@ class Statistics {
                         $sqlParams[] = $params['fechaFin'] . " 23:59:59";
                     }
                     
-                    $query = "SELECT id, nombre, correo, codigo, programa, facultad, 
+                    if (isset($params['programa']) && $params['programa']) {
+                        $whereClause = $whereClause ? $whereClause . " AND " : " WHERE ";
+                        $whereClause .= "programa = ?";
+                        $sqlParams[] = $params['programa'];
+                    }
+                    
+                    $query = "SELECT id, nombre, correo, codigo, programa as carrera, facultad as departamento, 
                              DATE_FORMAT(entrada, '%Y-%m-%d %H:%i:%s') as entrada, 
                              DATE_FORMAT(salida, '%Y-%m-%d %H:%i:%s') as salida, 
                              sede 
@@ -296,7 +309,7 @@ class Statistics {
                     $stmt->execute($sqlParams);
                     
                     $data = $stmt->fetchAll();
-                    $headers = ['ID', 'Nombre', 'Correo', 'Código', 'Programa', 'Facultad', 'Entrada', 'Salida', 'Sede'];
+                    $headers = ['ID', 'Nombre', 'Correo', 'Código', 'Carrera', 'Departamento', 'Entrada', 'Salida', 'Sede'];
                     break;
             }
             
@@ -311,6 +324,37 @@ class Statistics {
             return [
                 'headers' => [],
                 'data' => [],
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Obtiene la lista de todos los programas académicos
+     * @return array Lista de programas
+     */
+    public function getAllPrograms() {
+        try {
+            // Consulta para obtener todos los programas académicos distintos
+            $query = "SELECT DISTINCT programa as carrera 
+                     FROM becl_registro 
+                     WHERE programa IS NOT NULL AND programa != '' 
+                     ORDER BY programa";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            
+            $result = $stmt->fetchAll();
+            
+            return [
+                'status' => 'success',
+                'programas' => $result
+            ];
+        } catch (PDOException $e) {
+            error_log("Error en getAllPrograms: " . $e->getMessage());
+            return [
+                'status' => 'error',
+                'message' => 'Error al obtener los programas académicos',
                 'error' => $e->getMessage()
             ];
         }

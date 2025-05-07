@@ -40,9 +40,9 @@ if (!$userData) {
 }
 
 // Verificar si el usuario es administrador
-if ($userData['usuario'] !== 'adminbecl') {
+if ($userData['nivel'] !== 'admin' && $userData['nivel'] !== 'administrativo' && $userData['nivel'] !== 'entrada') {
     http_response_code(403);
-    echo json_encode(['status' => 'error', 'message' => 'Acceso denegado. Se requieren permisos de administrador']);
+    echo json_encode(['status' => 'error', 'message' => 'Acceso denegado. Se requieren permisos de administrador o administrativo']);
     exit;
 }
 
@@ -66,6 +66,8 @@ if (strpos($request_path, 'estadisticas/programas') !== false) {
     $path = '/estadisticas/semanal';
 } elseif (strpos($request_path, 'reportes/excel') !== false) {
     $path = '/reportes/excel';
+} elseif (strpos($request_path, 'programas') !== false) {
+    $path = '/programas';
 } else {
     $path = '/' . $endpoint;
 }
@@ -76,14 +78,22 @@ $statsExtension = new StatisticsExtension();
 
 // Procesar la solicitud según la ruta
 switch ($path) {
+    case '/programas':
+        // Obtener lista de programas académicos
+        $result = $statistics->getAllPrograms();
+        
+        echo json_encode($result);
+        break;
+        
     case '/estadisticas/programas':
         // Obtener parámetros
         $sede = $_GET['sede'] ?? null;
         $fechaInicio = $_GET['fechaInicio'] ?? null;
         $fechaFin = $_GET['fechaFin'] ?? null;
+        $programa = $_GET['programa'] ?? null;
         
         // Obtener estadísticas por programa
-        $result = $statistics->getStatsByProgram($sede, $fechaInicio, $fechaFin);
+        $result = $statistics->getStatsByProgram($sede, $fechaInicio, $fechaFin, $programa);
         
         echo json_encode([
             'status' => 'success',
@@ -127,7 +137,8 @@ switch ($path) {
             'sede' => $_GET['sede'] ?? null,
             'fechaInicio' => $_GET['fechaInicio'] ?? null,
             'fechaFin' => $_GET['fechaFin'] ?? null,
-            'year' => $_GET['year'] ?? null
+            'year' => $_GET['year'] ?? null,
+            'programa' => $_GET['programa'] ?? null
         ];
         
         // Obtener datos para exportar
@@ -176,9 +187,10 @@ switch ($path) {
         $fechaFin = $_GET['fechaFin'] ?? null;
         $sede = $_GET['sede'] ?? null;
         $searchTerm = $_GET['searchTerm'] ?? null;
+        $programa = $_GET['programa'] ?? null;
         
         // Obtener datos para exportar usando la instancia de StatisticsExtension
-        $exportData = $statsExtension->getConsultasExportData($fechaInicio, $fechaFin, $sede, $searchTerm);
+        $exportData = $statsExtension->getConsultasExportData($fechaInicio, $fechaFin, $sede, $searchTerm, $programa);
         
         // Verificar si hay datos para exportar
         if (empty($exportData['data'])) {

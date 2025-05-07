@@ -1,6 +1,9 @@
 // Variable global para almacenar la sede asignada
 let sedeAsignada = '';
 
+// Variables para gestión de usuarios
+let userToDelete = null;
+
 // Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', () => {
     // Elementos del DOM
@@ -18,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const navEstadisticasItem = document.getElementById('navEstadisticasItem');
     const navFuncionarios = document.getElementById('navFuncionarios');
     const navFuncionariosItem = document.getElementById('navFuncionariosItem');
+    const navUsuarios = document.getElementById('navUsuarios');
+    const navUsuariosItem = document.getElementById('navUsuariosItem');
     
     // Secciones
     const registrarEntradaSection = document.getElementById('registrarEntradaSection');
@@ -25,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const consultasSection = document.getElementById('consultasSection');
     const estadisticasSection = document.getElementById('estadisticasSection');
     const funcionariosSection = document.getElementById('funcionariosSection');
+    const usuariosSection = document.getElementById('usuariosSection');
     
     // Formularios
     const searchStudentForm = document.getElementById('searchStudentForm');
@@ -35,6 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshActiveBtn = document.getElementById('refreshActiveBtn');
     const searchDateBtn = document.getElementById('searchDateBtn');
     const searchTermBtn = document.getElementById('searchTermBtn');
+    
+    // Elementos para gestión de usuarios
+    const addUserBtn = document.getElementById('addUserBtn');
+    const saveUserBtn = document.getElementById('saveUserBtn');
+    const confirmDeleteUserBtn = document.getElementById('confirmDeleteUserBtn');
+    
+    // Modales
+    const userModal = new bootstrap.Modal(document.getElementById('userModal'));
+    const deleteUserModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
     
     // Verificar autenticación al cargar la página
     const checkAuth = async () => {
@@ -65,168 +80,75 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUser.textContent = user.usuario;
             
             // Configurar la interfaz según el usuario
-            configureUIByUser(user.usuario);
+            configureUIByUser(user.usuario, user.nivel);
         }
     };
     
     // Configurar la interfaz según el usuario
-    const configureUIByUser = (username) => {
+    const configureUIByUser = (username, nivel) => {
         // Ocultar todas las secciones y opciones de navegación por defecto
         registrarEntradaSection.classList.add('d-none');
         entradasActivasSection.classList.add('d-none');
         consultasSection.classList.add('d-none');
         estadisticasSection.classList.add('d-none');
         funcionariosSection.classList.add('d-none');
+        usuariosSection.classList.add('d-none');
         
         navRegistrarEntrada.parentElement.classList.add('d-none');
         navEntradasActivas.parentElement.classList.add('d-none');
         navConsultas.parentElement.classList.add('d-none');
-        navEstadisticas.parentElement.classList.add('d-none');
-        navFuncionarios.parentElement.classList.add('d-none');
+        navEstadisticasItem.classList.add('d-none');
+        navFuncionariosItem.classList.add('d-none');
+        navUsuariosItem.classList.add('d-none');
         
-        // Configurar según el usuario
-        if (username === 'entradabecl') {
-            // Usuario de sede Principal
-            navRegistrarEntrada.parentElement.classList.remove('d-none');
-            navRegistrarEntrada.classList.add('active');
-            registrarEntradaSection.classList.remove('d-none');
-            
-            // Ocultar el selector de sede y mostrar un texto informativo
-            const sedeContainer = document.getElementById('sede').parentElement;
-            const sedeLabel = sedeContainer.querySelector('label');
-            
-            // Guardar el valor de sede para usarlo en el formulario
-            sedeAsignada = 'Principal';
-            
-            // Crear un elemento para mostrar la sede asignada
-            const sedeInfo = document.createElement('div');
-            sedeInfo.classList.add('alert', 'alert-info', 'mt-2');
-            sedeInfo.innerHTML = '<strong>Sede asignada:</strong> Principal';
-            
-            // Reemplazar el selector con el texto informativo
-            sedeContainer.innerHTML = '';
-            sedeContainer.appendChild(sedeLabel);
-            sedeContainer.appendChild(sedeInfo);
-            
-        } else if (username === 'entradabecle') {
-            // Usuario de sede Enfermería
-            navRegistrarEntrada.parentElement.classList.remove('d-none');
-            navRegistrarEntrada.classList.add('active');
-            registrarEntradaSection.classList.remove('d-none');
-            
-            // Ocultar el selector de sede y mostrar un texto informativo
-            const sedeContainer = document.getElementById('sede').parentElement;
-            const sedeLabel = sedeContainer.querySelector('label');
-            
-            // Guardar el valor de sede para usarlo en el formulario
-            sedeAsignada = 'Enfermeria';
-            
-            // Crear un elemento para mostrar la sede asignada
-            const sedeInfo = document.createElement('div');
-            sedeInfo.classList.add('alert', 'alert-info', 'mt-2');
-            sedeInfo.innerHTML = '<strong>Sede asignada:</strong> Enfermería';
-            
-            // Reemplazar el selector con el texto informativo
-            sedeContainer.innerHTML = '';
-            sedeContainer.appendChild(sedeLabel);
-            sedeContainer.appendChild(sedeInfo);
-            
-        } else if (username === 'adminbecl') {
+        // Configurar según el nivel de usuario
+        if (nivel === 'admin') {
             // Usuario administrador - ve todos los registros
             // Mostrar todas las opciones de navegación para el administrador
-            navRegistrarEntrada.parentElement.classList.add('d-none');
             navEntradasActivas.parentElement.classList.remove('d-none');
             navConsultas.parentElement.classList.remove('d-none');
-            navEstadisticas.parentElement.classList.remove('d-none');
-            navFuncionarios.parentElement.classList.remove('d-none');
+            navEstadisticasItem.classList.remove('d-none');
+            navFuncionariosItem.classList.remove('d-none');
+            navUsuariosItem.classList.remove('d-none');
+            
+            // Activar la sección de usuarios por defecto
+            navUsuarios.classList.add('active');
+            usuariosSection.classList.remove('d-none');
+            
+            // Cargar la lista de usuarios
+            loadUsers();
+            
+        } else if (nivel === 'entrada' || username === 'entradabecl' || username === 'entradabecle') {
+            // Usuario de entrada
+            navRegistrarEntrada.parentElement.classList.remove('d-none');
+            navRegistrarEntrada.classList.add('active');
+            registrarEntradaSection.classList.remove('d-none');
+            
+            // Ocultar el selector de sede y mostrar un texto informativo
+            const sedeContainer = document.getElementById('sede').parentElement;
+            const sedeLabel = sedeContainer.querySelector('label');
+            
+            // Guardar el valor de sede para usarlo en el formulario
+            sedeAsignada = username === 'entradabecle' ? 'Enfermeria' : 'Principal';
+            
+            // Crear un elemento para mostrar la sede asignada
+            const sedeInfo = document.createElement('div');
+            sedeInfo.classList.add('alert', 'alert-info', 'mt-2');
+            sedeInfo.innerHTML = `<strong>Sede asignada:</strong> ${username === 'entradabecle' ? 'Enfermería' : 'Principal'}`;
+            
+            // Reemplazar el selector con el texto informativo
+            sedeContainer.innerHTML = '';
+            sedeContainer.appendChild(sedeLabel);
+            sedeContainer.appendChild(sedeInfo);
+            
+        } else if (nivel === 'administrativo') {
+            // Usuario administrativo
+            navConsultas.parentElement.classList.remove('d-none');
+            navEstadisticasItem.classList.remove('d-none');
             
             // Activar la sección de consultas por defecto
             navConsultas.classList.add('active');
             consultasSection.classList.remove('d-none');
-            
-            // Modificar el título para indicar que es la vista de administrador
-            const consultasHeader = document.querySelector('#consultasSection .card-header h5');
-            if (consultasHeader) {
-                consultasHeader.textContent = 'Panel de Administración - Todos los Registros';
-            }
-            
-            // Mostrar los filtros de fecha y búsqueda
-            const tabsContainer = document.getElementById('consultasTabs');
-            if (tabsContainer) {
-                tabsContainer.classList.remove('d-none');
-            }
-            
-            const tabContent = document.querySelector('.tab-content');
-            if (tabContent) {
-                tabContent.classList.remove('d-none');
-            }
-            
-            // Añadir una barra de búsqueda general encima de los tabs
-            const searchContainer = document.createElement('div');
-            searchContainer.className = 'mb-4';
-            searchContainer.innerHTML = `
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="card-title">Búsqueda rápida</h6>
-                        <div class="input-group">
-                            <input type="text" id="generalSearchInput" class="form-control" placeholder="Buscar por nombre, código, correo...">
-                            <button id="generalSearchBtn" class="btn btn-danger">Buscar</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Insertar la barra de búsqueda antes de los tabs
-            if (tabsContainer && tabsContainer.parentNode) {
-                tabsContainer.parentNode.insertBefore(searchContainer, tabsContainer);
-            }
-            
-            // Crear un contenedor para la paginación
-            const paginationContainer = document.createElement('div');
-            paginationContainer.id = 'paginationContainer';
-            paginationContainer.className = 'my-3';
-            
-            // Añadir el contenedor de paginación antes de la tabla
-            const tableContainer = document.querySelector('#consultasSection .table-responsive');
-            if (tableContainer && tableContainer.parentNode) {
-                tableContainer.parentNode.insertBefore(paginationContainer, tableContainer);
-            }
-            
-            // Cargar todos los registros automáticamente
-            loadAllEntries();
-            
-            // Añadir un indicador de carga
-            const loadingIndicator = document.createElement('div');
-            loadingIndicator.id = 'loadingIndicator';
-            loadingIndicator.className = 'text-center my-3';
-            loadingIndicator.innerHTML = '<div class="spinner-border text-danger" role="status"><span class="visually-hidden">Cargando...</span></div><p class="mt-2">Cargando todos los registros...</p>';
-            
-            if (tableContainer && tableContainer.parentNode) {
-                tableContainer.parentNode.insertBefore(loadingIndicator, tableContainer);
-            }
-            
-        } else if (username === 'computobecl') {
-            // Usuario de cómputo - mostrar la sección de gestión de equipos
-            // Mostrar la sección de cómputo que ya existe en el HTML
-            const computoSection = document.getElementById('computoSection');
-            if (computoSection) {
-                // Ocultar otras secciones
-                registrarEntradaSection.classList.add('d-none');
-                entradasActivasSection.classList.add('d-none');
-                consultasSection.classList.add('d-none');
-                estadisticasSection.classList.add('d-none');
-                funcionariosSection.classList.add('d-none');
-                
-                // Mostrar la sección de cómputo
-                computoSection.classList.remove('d-none');
-                
-                // Cambiar el color del encabezado a rojo para mantener consistencia
-                const cardHeader = computoSection.querySelector('.card-header');
-                if (cardHeader) {
-                    cardHeader.classList.remove('bg-primary');
-                    cardHeader.classList.add('bg-danger');
-                }
-            }
         }
     };
     
@@ -249,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (consultasSection) consultasSection.classList.add('d-none');
         if (estadisticasSection) estadisticasSection.classList.add('d-none');
         if (funcionariosSection) funcionariosSection.classList.add('d-none');
+        if (usuariosSection) usuariosSection.classList.add('d-none');
         
         // Desactivar todos los enlaces de navegación
         if (navRegistrarEntrada) navRegistrarEntrada.classList.remove('active');
@@ -256,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navConsultas) navConsultas.classList.remove('active');
         if (navEstadisticas) navEstadisticas.classList.remove('active');
         if (navFuncionarios) navFuncionarios.classList.remove('active');
+        if (navUsuarios) navUsuarios.classList.remove('active');
         
         // Mostrar la sección solicitada
         section.classList.remove('d-none');
@@ -316,6 +240,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (section === funcionariosSection && navFuncionarios) {
             navFuncionarios.classList.add('active');
             loadFuncionarios(); // Cargar funcionarios
+        } else if (section === usuariosSection && navUsuarios) {
+            navUsuarios.classList.add('active');
+            loadUsers();
         }
     };
     
@@ -515,19 +442,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const fechaInicio = document.getElementById('fechaInicio').value;
         const fechaFin = document.getElementById('fechaFin').value;
         const sede = document.getElementById('sedeFecha').value;
+        const programa = document.getElementById('programaFecha').value;
         
         // Validar fechas
         if (!fechaInicio || !fechaFin) {
             Swal.fire({
                 icon: 'warning',
-                title: 'Campos Requeridos',
-                text: 'Por favor, ingrese fechas de inicio y fin'
+                title: 'Fechas requeridas',
+                text: 'Por favor ingrese fechas de inicio y fin'
             });
             return;
         }
         
         try {
-            const response = await entryService.getEntriesByDate(fechaInicio, fechaFin, sede);
+            // Mostrar indicador de carga
+            Swal.fire({
+                title: 'Cargando datos',
+                text: 'Por favor espere...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Obtener datos con el nuevo parámetro de programa
+            const response = await entryService.getEntriesByDate(fechaInicio, fechaFin, sede, programa);
+            
+            // Cerrar el indicador de carga independientemente del resultado
+            Swal.close();
             
             if (response.status === 'success') {
                 // Mostrar resultados en la tabla
@@ -541,6 +483,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (error) {
+            // Cerrar el indicador de carga en caso de error
+            Swal.close();
+            
             console.error('Error al cargar entradas por fecha:', error);
             Swal.fire({
                 icon: 'error',
@@ -565,7 +510,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
+            // Mostrar indicador de carga
+            Swal.fire({
+                title: 'Buscando',
+                text: 'Por favor espere...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
             const response = await entryService.searchEntry(term);
+            
+            // Cerrar el indicador de carga
+            Swal.close();
             
             if (response.status === 'success') {
                 // Mostrar resultados en la tabla
@@ -579,6 +537,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (error) {
+            // Cerrar el indicador de carga en caso de error
+            Swal.close();
+            
             console.error('Error al buscar entradas:', error);
             Swal.fire({
                 icon: 'error',
@@ -832,31 +793,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
-            // Mostrar indicador de carga
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            if (loadingIndicator) {
-                loadingIndicator.style.display = 'block';
-            } else {
-                // Crear indicador de carga si no existe
-                const newLoadingIndicator = document.createElement('div');
-                newLoadingIndicator.id = 'loadingIndicator';
-                newLoadingIndicator.className = 'text-center my-3';
-                newLoadingIndicator.innerHTML = '<div class="spinner-border text-danger" role="status"><span class="visually-hidden">Buscando...</span></div><p class="mt-2">Buscando registros...</p>';
-                
-                const tableContainer = document.querySelector('#consultasSection .table-responsive');
-                if (tableContainer && tableContainer.parentNode) {
-                    tableContainer.parentNode.insertBefore(newLoadingIndicator, tableContainer);
+            // Mostrar indicador de carga con SweetAlert
+            Swal.fire({
+                title: 'Buscando registros',
+                text: 'Por favor espere...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
-            }
+            });
             
             // Realizar búsqueda
             const response = await entryService.searchEntry(searchTerm);
             
-            // Ocultar indicador de carga
-            const updatedLoadingIndicator = document.getElementById('loadingIndicator');
-            if (updatedLoadingIndicator) {
-                updatedLoadingIndicator.style.display = 'none';
-            }
+            // Cerrar el indicador de carga
+            Swal.close();
             
             if (response.status === 'success') {
                 // Actualizar registros y paginación
@@ -884,18 +835,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (error) {
+            // Cerrar el indicador de carga en caso de error
+            Swal.close();
+            
             console.error('Error en búsqueda general:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: 'Error de conexión con el servidor'
             });
-            
-            // Ocultar indicador de carga
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            if (loadingIndicator) {
-                loadingIndicator.style.display = 'none';
-            }
         }
     };
     
@@ -967,6 +915,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (error) {
+            // Cerrar el indicador de carga en caso de error
+            Swal.close();
+            
             console.error('Error al cargar funcionarios:', error);
             Swal.fire({
                 icon: 'error',
@@ -1203,14 +1154,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Botón de exportación a Excel en la sección de consultas
     if (document.getElementById('exportConsultasExcel')) {
         document.getElementById('exportConsultasExcel').addEventListener('click', async () => {
-            // Obtener los parámetros de filtro actuales
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
-            const sede = document.getElementById('sedeFecha').value;
-            const searchTerm = document.getElementById('searchTerm')?.value || '';
+            let fechaInicio, fechaFin, sede, searchTerm, programa;
+            
+            // Determinar qué tab está activo
+            const porFechaTab = document.getElementById('porFechaTab');
+            const buscarTab = document.getElementById('buscarTab');
+            
+            if (porFechaTab.classList.contains('active')) {
+                fechaInicio = document.getElementById('fechaInicio').value;
+                fechaFin = document.getElementById('fechaFin').value;
+                sede = document.getElementById('sedeFecha').value;
+                programa = document.getElementById('programaFecha').value;
+                
+                if (!fechaInicio || !fechaFin) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Fechas requeridas',
+                        text: 'Por favor ingrese fechas de inicio y fin para exportar'
+                    });
+                    return;
+                }
+            } else if (buscarTab.classList.contains('active')) {
+                searchTerm = document.getElementById('searchTerm').value;
+                
+                if (!searchTerm) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Término de búsqueda requerido',
+                        text: 'Por favor ingrese un término de búsqueda para exportar'
+                    });
+                    return;
+                }
+            }
             
             try {
-                // Mostrar indicador de carga
                 Swal.fire({
                     title: 'Generando Excel',
                     text: 'Por favor espere mientras se genera el archivo...',
@@ -1220,16 +1197,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
                 
-                // Llamar al servicio de estadísticas para exportar a Excel
                 const response = await statsService.exportToExcel('consultas', {
                     fechaInicio,
                     fechaFin,
                     sede,
-                    searchTerm
+                    searchTerm,
+                    programa
                 });
                 
                 // La función exportToExcel ya maneja la descarga y los mensajes
             } catch (error) {
+                // Cerrar el indicador de carga en caso de error
+                Swal.close();
+                
                 console.error('Error al exportar consultas a Excel:', error);
                 Swal.fire({
                     icon: 'error',
@@ -1248,6 +1228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const fechaInicio = document.getElementById('estProgFechaInicio').value;
             const fechaFin = document.getElementById('estProgFechaFin').value;
             const sede = document.getElementById('estProgSede').value;
+            const programa = document.getElementById('estProgPrograma').value;
             
             try {
                 // Mostrar indicador de carga
@@ -1260,7 +1241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
                 
-                const response = await statsService.getStatsByProgram(fechaInicio, fechaFin, sede);
+                const response = await statsService.getStatsByProgram(fechaInicio, fechaFin, sede, programa);
                 
                 Swal.close();
                 
@@ -1274,6 +1255,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } catch (error) {
+                // Cerrar el indicador de carga en caso de error
+                Swal.close();
+                
                 console.error('Error al generar estadísticas por programa:', error);
                 Swal.fire({
                     icon: 'error',
@@ -1288,6 +1272,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const fechaInicio = document.getElementById('estProgFechaInicio').value;
             const fechaFin = document.getElementById('estProgFechaFin').value;
             const sede = document.getElementById('estProgSede').value;
+            const programa = document.getElementById('estProgPrograma').value;
             
             try {
                 Swal.fire({
@@ -1302,7 +1287,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await statsService.exportToExcel('programas', {
                     fechaInicio,
                     fechaFin,
-                    sede
+                    sede,
+                    programa
                 });
                 
                 Swal.close();
@@ -1322,6 +1308,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } catch (error) {
+                // Cerrar el indicador de carga en caso de error
+                Swal.close();
+                
                 console.error('Error al exportar a Excel:', error);
                 Swal.fire({
                     icon: 'error',
@@ -1364,6 +1353,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } catch (error) {
+                // Cerrar el indicador de carga en caso de error
+                Swal.close();
+                
                 console.error('Error al generar estadísticas mensuales:', error);
                 Swal.fire({
                     icon: 'error',
@@ -1410,6 +1402,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } catch (error) {
+                // Cerrar el indicador de carga en caso de error
+                Swal.close();
+                
                 console.error('Error al exportar a Excel:', error);
                 Swal.fire({
                     icon: 'error',
@@ -1453,6 +1448,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } catch (error) {
+                // Cerrar el indicador de carga en caso de error
+                Swal.close();
+                
                 console.error('Error al generar estadísticas semanales:', error);
                 Swal.fire({
                     icon: 'error',
@@ -1501,6 +1499,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } catch (error) {
+                // Cerrar el indicador de carga en caso de error
+                Swal.close();
+                
                 console.error('Error al exportar a Excel:', error);
                 Swal.fire({
                     icon: 'error',
@@ -1527,4 +1528,235 @@ document.addEventListener('DOMContentLoaded', () => {
             performGeneralSearch();
         }
     });
+    
+    // ===== GESTIÓN DE USUARIOS =====
+    
+    // Cargar todos los usuarios
+    const loadUsers = async () => {
+        const result = await userService.getAllUsers();
+        
+        if (result.success) {
+            renderUsersTable(result.users);
+        } else {
+            alert('Error al cargar los usuarios: ' + result.message);
+        }
+    };
+    
+    // Renderizar la tabla de usuarios
+    const renderUsersTable = (users) => {
+        const table = document.getElementById('usersTable');
+        table.innerHTML = '';
+        
+        if (users.length === 0) {
+            table.innerHTML = '<tr><td colspan="4" class="text-center">No hay usuarios registrados</td></tr>';
+            return;
+        }
+        
+        // Mapear nivel a texto más descriptivo
+        const nivelTexto = {
+            'admin': 'Administrador',
+            'entrada': 'Entrada',
+            'administrativo': 'Administrativo'
+        };
+        
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${user.id}</td>
+                <td>${user.usuario}</td>
+                <td>${nivelTexto[user.nivel] || user.nivel}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary edit-user" data-id="${user.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-user" data-id="${user.id}" data-usuario="${user.usuario}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            table.appendChild(row);
+        });
+        
+        // Agregar event listeners a los botones de acción
+        document.querySelectorAll('.edit-user').forEach(btn => {
+            btn.addEventListener('click', () => openEditUserModal(btn.dataset.id));
+        });
+        
+        document.querySelectorAll('.delete-user').forEach(btn => {
+            btn.addEventListener('click', () => openDeleteUserModal(btn.dataset.id, btn.dataset.usuario));
+        });
+    };
+    
+    // Abrir modal para crear un nuevo usuario
+    const openAddUserModal = () => {
+        document.getElementById('userModalLabel').textContent = 'Nuevo Usuario';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('passwordInput').required = true;
+        document.getElementById('passwordHelpText').classList.add('d-none');
+        userModal.show();
+    };
+    
+    // Abrir modal para editar un usuario existente
+    const openEditUserModal = async (userId) => {
+        document.getElementById('userModalLabel').textContent = 'Editar Usuario';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = userId;
+        document.getElementById('passwordInput').required = false;
+        document.getElementById('passwordHelpText').classList.remove('d-none');
+        
+        // Buscar el usuario en la tabla para prellenar el formulario
+        const table = document.getElementById('usersTable');
+        const rows = table.querySelectorAll('tr');
+        
+        for (const row of rows) {
+            const cells = row.querySelectorAll('td');
+            if (cells.length > 0 && cells[0].textContent === userId) {
+                const usuario = cells[1].textContent;
+                const nivel = cells[2].textContent;
+                
+                document.getElementById('usuarioInput').value = usuario;
+                
+                // Mapear el texto descriptivo al valor real
+                const nivelMap = {
+                    'Administrador': 'admin',
+                    'Entrada': 'entrada',
+                    'Administrativo': 'administrativo'
+                };
+                document.getElementById('nivelInput').value = nivelMap[nivel] || '';
+                
+                break;
+            }
+        }
+        
+        userModal.show();
+    };
+    
+    // Guardar un usuario (crear o actualizar)
+    const saveUser = async () => {
+        // Validar el formulario
+        const form = document.getElementById('userForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        const userId = document.getElementById('userId').value;
+        const userData = {
+            usuario: document.getElementById('usuarioInput').value,
+            password: document.getElementById('passwordInput').value,
+            nivel: document.getElementById('nivelInput').value
+        };
+        
+        let result;
+        
+        if (userId) {
+            // Actualizar usuario existente
+            result = await userService.updateUser(userId, userData);
+        } else {
+            // Crear nuevo usuario
+            result = await userService.createUser(userData);
+        }
+        
+        if (result.success) {
+            // Cerrar modal y recargar usuarios
+            userModal.hide();
+            loadUsers();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    };
+    
+    // Abrir modal de confirmación para eliminar un usuario
+    const openDeleteUserModal = (userId, username) => {
+        userToDelete = userId;
+        document.getElementById('deleteUserName').textContent = username;
+        deleteUserModal.show();
+    };
+    
+    // Eliminar un usuario
+    const deleteUser = async () => {
+        if (!userToDelete) return;
+        
+        const result = await userService.deleteUser(userToDelete);
+        
+        if (result.success) {
+            // Cerrar modal y recargar usuarios
+            deleteUserModal.hide();
+            loadUsers();
+        } else {
+            alert('Error: ' + result.message);
+        }
+        
+        userToDelete = null;
+    };
+    
+    // Event listeners para la gestión de usuarios
+    if (addUserBtn) addUserBtn.addEventListener('click', openAddUserModal);
+    if (saveUserBtn) saveUserBtn.addEventListener('click', saveUser);
+    if (confirmDeleteUserBtn) confirmDeleteUserBtn.addEventListener('click', deleteUser);
+    
+    // Event listener para navegación de usuarios
+    if (navUsuarios) {
+        navUsuarios.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection(usuariosSection);
+            loadUsers();
+        });
+    }
+    
+    // Cargar años para el selector de estadísticas mensuales
+    const loadYearsForStats = () => {
+        const yearSelect = document.getElementById('estMensualYear');
+        if (yearSelect) {
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= currentYear - 5; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+        }
+    };
+    
+    // Función para cargar los programas académicos
+    const loadProgramas = async () => {
+        try {
+            const response = await statsService.getAllPrograms();
+            
+            if (response.status === 'success' && response.programas) {
+                // Selectores donde cargar los programas
+                const selectors = [
+                    document.getElementById('estProgPrograma'),
+                    document.getElementById('programaFecha')
+                ];
+                
+                // Llenar cada selector si existe
+                selectors.forEach(selector => {
+                    if (selector) {
+                        // Conservar la opción "Todos"
+                        const defaultOption = selector.querySelector('option');
+                        selector.innerHTML = '';
+                        selector.appendChild(defaultOption);
+                        
+                        // Agregar cada programa como opción
+                        response.programas.forEach(programa => {
+                            const option = document.createElement('option');
+                            option.value = programa.carrera;
+                            option.textContent = programa.carrera;
+                            selector.appendChild(option);
+                        });
+                    }
+                });
+            } else {
+                console.error('Error al cargar programas:', response.message);
+            }
+        } catch (error) {
+            console.error('Error al obtener programas académicos:', error);
+        }
+    };
+    
+    // Llamar a las funciones de inicialización
+    loadYearsForStats();
+    loadProgramas();
 }); 

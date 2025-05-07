@@ -78,8 +78,8 @@ if ($method === 'GET' && $endpoint === 'student') {
                         'nombre' => $student['firstname'] . ' ' . $student['surname'],
                         'correo' => $student['email'],
                         'codigo' => $student['cardnumber'],
-                        'programa' => $student['sort1'] ?? '',
-                        'facultad' => $student['branchcode'] ?? ''
+                        'programa' => $student['carrera'] ?? '',
+                        'facultad' => $student['departamento'] ?? ''
                     ]
                 ];
             } else {
@@ -204,25 +204,33 @@ elseif ($method === 'GET' && $endpoint === 'by-date') {
             'message' => 'No autorizado'
         ];
     } else {
-        // Validar parámetros requeridos
-        if (!isset($_GET['inicio']) || !isset($_GET['fin'])) {
-            $response = [
+        // Extraer parámetros de la URL
+        $inicio = $_GET['inicio'] ?? null;
+        $fin = $_GET['fin'] ?? null;
+        $sede = $_GET['sede'] ?? null;
+        $programa = $_GET['programa'] ?? null;
+        
+        if (!$inicio || !$fin) {
+            http_response_code(400);
+            echo json_encode([
                 'status' => 'error',
-                'message' => 'Fecha inicio y fin son requeridos'
-            ];
-        } else {
-            // Obtener parámetros
-            $inicio = $_GET['inicio'];
-            $fin = $_GET['fin'];
-            $sede = isset($_GET['sede']) ? $_GET['sede'] : null;
-            
-            // Obtener entradas por fecha
-            $entries = $entry->getEntriesByDate($inicio, $fin, $sede);
+                'message' => 'Se requieren los parámetros de fecha inicio y fin'
+            ]);
+            exit;
+        }
+        
+        try {
+            // Buscar entradas por fecha
+            $entries = $entry->getEntriesByDate($inicio, $fin, $sede, $programa);
             
             $response = [
                 'status' => 'success',
-                'message' => 'Entradas por fecha',
                 'entries' => $entries
+            ];
+        } catch (Exception $e) {
+            $response = [
+                'status' => 'error',
+                'message' => 'Error al obtener entradas por fecha: ' . $e->getMessage()
             ];
         }
     }

@@ -23,9 +23,10 @@ class StatsService {
      * @param {string|null} fechaInicio - Fecha de inicio (opcional)
      * @param {string|null} fechaFin - Fecha de fin (opcional)
      * @param {string|null} sede - Sede para filtrar (opcional)
+     * @param {string|null} programa - Programa académico para filtrar (opcional)
      * @returns {Promise} - Promesa con los datos de estadísticas
      */
-    async getStatsByProgram(fechaInicio = null, fechaFin = null, sede = null) {
+    async getStatsByProgram(fechaInicio = null, fechaFin = null, sede = null, programa = null) {
         try {
             let url = `${STATS_API_URL}/estadisticas/programas`;
             const params = new URLSearchParams();
@@ -33,6 +34,7 @@ class StatsService {
             if (fechaInicio) params.append('fechaInicio', fechaInicio);
             if (fechaFin) params.append('fechaFin', fechaFin);
             if (sede) params.append('sede', sede);
+            if (programa) params.append('programa', programa);
             
             const queryString = params.toString();
             if (queryString) url += `?${queryString}`;
@@ -170,6 +172,34 @@ class StatsService {
     }
     
     /**
+     * Obtiene la lista de todos los programas académicos
+     * @returns {Promise} - Promesa con la lista de programas
+     */
+    async getAllPrograms() {
+        try {
+            const url = `${STATS_API_URL}/programas`;
+            console.log('Solicitando lista de programas a:', url);
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: auth.getAuthHeaders()
+            });
+            
+            if (!response.ok) {
+                console.error(`Error HTTP: ${response.status} - ${response.statusText}`);
+                return {
+                    status: 'error',
+                    message: `Error del servidor: ${response.status} ${response.statusText}`
+                };
+            }
+            
+            return await response.json();
+        } catch (error) {
+            return handleFetchError(error, 'lista de programas');
+        }
+    }
+    
+    /**
      * Prueba la conexión con el microservicio de estadísticas
      * @returns {Promise<boolean>} - Verdadero si la conexión es exitosa
      */
@@ -200,14 +230,14 @@ class StatsService {
     /**
      * Exporta datos a Excel
      * @param {string} tipo - Tipo de reporte (programas, mensual, semanal, completo)
-     * @param {Object} params - Parámetros adicionales para el reporte
-     * @returns {Promise} - Promesa con la URL del archivo generado
+     * @param {Object} params - Parámetros adicionales (fechaInicio, fechaFin, sede, year, programa)
+     * @returns {Promise} - Promesa con la respuesta del servidor
      */
     async exportToExcel(tipo, params = {}) {
         try {
             // Mostrar indicador de carga
             Swal.fire({
-                title: 'Generando Excel',
+                title: 'Generando archivo Excel',
                 text: 'Por favor espere mientras se genera el archivo...',
                 allowOutsideClick: false,
                 didOpen: () => {
@@ -215,6 +245,7 @@ class StatsService {
                 }
             });
             
+            // Construir URL con los parámetros
             let url = `${STATS_API_URL}/reportes/excel?tipo=${tipo}`;
             
             // Añadir parámetros adicionales

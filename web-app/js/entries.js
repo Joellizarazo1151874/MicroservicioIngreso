@@ -97,11 +97,16 @@ class EntryService {
     }
 
     // Obtener entradas por fecha
-    async getEntriesByDate(fechaInicio, fechaFin, sede = null) {
+    async getEntriesByDate(fechaInicio, fechaFin, sede = null, programa = null) {
         try {
             let url = `${ENTRY_API_URL}/entries/by-date?inicio=${encodeURIComponent(fechaInicio)}&fin=${encodeURIComponent(fechaFin)}`;
+            
             if (sede) {
                 url += `&sede=${encodeURIComponent(sede)}`;
+            }
+            
+            if (programa) {
+                url += `&programa=${encodeURIComponent(programa)}`;
             }
 
             const response = await fetch(url, {

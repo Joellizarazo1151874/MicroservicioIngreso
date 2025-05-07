@@ -19,9 +19,10 @@ class StatisticsExtension {
      * @param string|null $fechaFin Fecha de fin (opcional)
      * @param string|null $sede Sede para filtrar (opcional)
      * @param string|null $searchTerm Término de búsqueda (opcional)
+     * @param string|null $programa Programa específico para filtrar (opcional)
      * @return array Datos formateados para exportar a Excel
      */
-    public function getConsultasExportData($fechaInicio = null, $fechaFin = null, $sede = null, $searchTerm = null) {
+    public function getConsultasExportData($fechaInicio = null, $fechaFin = null, $sede = null, $searchTerm = null, $programa = null) {
         try {
             $conn = $this->db->getConnection();
             $params = [];
@@ -29,16 +30,16 @@ class StatisticsExtension {
             $conditions = [];
             
             // Construir cláusula WHERE según los filtros
-            if ($fechaInicio || $fechaFin || $sede || $searchTerm) {
+            if ($fechaInicio || $fechaFin || $sede || $searchTerm || $programa) {
                 $whereClause = " WHERE ";
                 
                 if ($fechaInicio) {
-                    $conditions[] = "DATE(fecha_entrada) >= ?";
+                    $conditions[] = "DATE(entrada) >= ?";
                     $params[] = $fechaInicio;
                 }
                 
                 if ($fechaFin) {
-                    $conditions[] = "DATE(fecha_entrada) <= ?";
+                    $conditions[] = "DATE(entrada) <= ?";
                     $params[] = $fechaFin;
                 }
                 
@@ -54,24 +55,29 @@ class StatisticsExtension {
                     $params[] = "%$searchTerm%";
                 }
                 
+                if ($programa) {
+                    $conditions[] = "programa = ?";
+                    $params[] = $programa;
+                }
+                
                 $whereClause .= implode(" AND ", $conditions);
             }
             
             // Consulta SQL para obtener los registros
-            $sql = "SELECT id, nombre, correo, codigo, fecha_entrada, fecha_salida, sede FROM entradas $whereClause ORDER BY id DESC";
+            $sql = "SELECT id, nombre, correo, codigo, programa as carrera, facultad as departamento, 
+                   DATE_FORMAT(entrada, '%Y-%m-%d %H:%i:%s') as entrada, 
+                   DATE_FORMAT(salida, '%Y-%m-%d %H:%i:%s') as salida, 
+                   sede FROM becl_registro $whereClause ORDER BY entrada DESC";
             
             // Preparar y ejecutar la consulta
             $stmt = $conn->prepare($sql);
             
             // Vincular parámetros si existen
             if (!empty($params)) {
-                foreach ($params as $i => $param) {
-                    $paramIndex = $i + 1; // PDO usa índices basados en 1
-                    $stmt->bindValue($paramIndex, $param);
-                }
+                $stmt->execute($params);
+            } else {
+                $stmt->execute();
             }
-            
-            $stmt->execute();
             
             // Obtener resultados
             $entries = [];
@@ -81,8 +87,10 @@ class StatisticsExtension {
                     $row['nombre'],
                     $row['correo'],
                     $row['codigo'],
-                    $row['fecha_entrada'],
-                    $row['fecha_salida'] ?? 'No registrada',
+                    $row['carrera'] ?? 'No especificado',
+                    $row['departamento'] ?? 'No especificado',
+                    $row['entrada'],
+                    $row['salida'] ?? 'No registrada',
                     $row['sede']
                 ];
             }
@@ -90,13 +98,14 @@ class StatisticsExtension {
             // Preparar datos para Excel
             $data = [
                 'tipo' => 'consultas',
-                'headers' => ['ID', 'Nombre', 'Correo', 'Código', 'Entrada', 'Salida', 'Sede'],
+                'headers' => ['ID', 'Nombre', 'Correo', 'Código', 'Carrera', 'Departamento', 'Entrada', 'Salida', 'Sede'],
                 'data' => $entries,
                 'params' => [
                     'fecha_inicio' => $fechaInicio ?? 'Todas',
                     'fecha_fin' => $fechaFin ?? 'Todas',
                     'sede' => $sede ?? 'Todas',
-                    'busqueda' => $searchTerm ?? 'Ninguna'
+                    'busqueda' => $searchTerm ?? 'Ninguna',
+                    'programa' => $programa ?? 'Todas'
                 ]
             ];
             
@@ -106,7 +115,7 @@ class StatisticsExtension {
             error_log("Error al obtener datos de consultas: " . $e->getMessage());
             return [
                 'tipo' => 'consultas',
-                'headers' => ['ID', 'Nombre', 'Correo', 'Código', 'Entrada', 'Salida', 'Sede'],
+                'headers' => ['ID', 'Nombre', 'Correo', 'Código', 'Carrera', 'Departamento', 'Entrada', 'Salida', 'Sede'],
                 'data' => [],
                 'params' => []
             ];

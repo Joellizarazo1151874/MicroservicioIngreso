@@ -27,8 +27,14 @@ class Entry {
                 return false;
             }
             
-            // Intentamos buscar el estudiante
-            $query = "SELECT * FROM vista_borrowers WHERE cardnumber = ?";
+            // Consulta para verificar el código con información más detallada
+            $query = "SELECT vista_borrowers.cardnumber, vista_borrowers.surname, vista_borrowers.firstname, vista_borrowers.email, 
+                      S.lib AS carrera, vista_authorised_values.lib AS departamento 
+                      FROM vista_borrowers 
+                      LEFT JOIN vista_authorised_values S ON vista_borrowers.sort2 = S.authorised_value 
+                      LEFT JOIN vista_authorised_values ON vista_borrowers.sort1 = vista_authorised_values.authorised_value 
+                      WHERE vista_borrowers.cardnumber = ?";
+            
             $stmt = $this->conn->prepare($query);
             $stmt->execute([$code]);
             
@@ -42,7 +48,12 @@ class Entry {
             }
             
             // Si no encontramos nada, intentamos con LIKE por si acaso
-            $query = "SELECT * FROM vista_borrowers WHERE cardnumber LIKE ?";
+            $query = "SELECT vista_borrowers.cardnumber, vista_borrowers.surname, vista_borrowers.firstname, vista_borrowers.email, 
+                      S.lib AS carrera, vista_authorised_values.lib AS departamento 
+                      FROM vista_borrowers 
+                      LEFT JOIN vista_authorised_values S ON vista_borrowers.sort2 = S.authorised_value 
+                      LEFT JOIN vista_authorised_values ON vista_borrowers.sort1 = vista_authorised_values.authorised_value 
+                      WHERE vista_borrowers.cardnumber LIKE ?";
             $stmt = $this->conn->prepare($query);
             $stmt->execute(["%$code%"]);
             
@@ -115,17 +126,32 @@ class Entry {
         }
     }
     
-    // Obtener todas las entradas filtradas por fecha
-    public function getEntriesByDate($fecha_inicio, $fecha_fin, $sede = null) {
+    // Obtener entradas por rango de fechas
+    public function getEntriesByDate($fechaInicio, $fechaFin, $sede = null, $programa = null) {
         try {
-            $query = "SELECT * FROM becl_registro WHERE entrada BETWEEN ? AND ?";
-            $params = [$fecha_inicio, $fecha_fin];
+            // Construir la consulta base
+            $query = "SELECT * FROM becl_registro WHERE DATE(entrada) BETWEEN :inicio AND :fin";
+            $params = [
+                ':inicio' => $fechaInicio,
+                ':fin' => $fechaFin
+            ];
             
+            // Filtrar por sede si se especifica
             if ($sede) {
-                $query .= " AND sede = ?";
-                $params[] = $sede;
+                $query .= " AND sede = :sede";
+                $params[':sede'] = $sede;
             }
             
+            // Filtrar por programa si se especifica
+            if ($programa) {
+                $query .= " AND programa = :programa";
+                $params[':programa'] = $programa;
+            }
+            
+            // Ordenar por fecha de entrada descendente
+            $query .= " ORDER BY entrada DESC";
+            
+            // Preparar y ejecutar la consulta
             $stmt = $this->conn->prepare($query);
             $stmt->execute($params);
             

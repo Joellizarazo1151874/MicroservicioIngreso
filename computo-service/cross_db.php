@@ -75,13 +75,12 @@ class CrossDBConnection {
             }
             
             // Consulta mejorada que incluye facultad y programa desde vista_authorised_values
-            $query = "SELECT vb.*, 
-                     S.lib AS programa, 
-                     vav.lib AS facultad 
-                     FROM vista_borrowers vb 
-                     LEFT JOIN vista_authorised_values S ON vb.sort2 = S.authorised_value 
-                     LEFT JOIN vista_authorised_values vav ON vb.sort1 = vav.authorised_value 
-                     WHERE vb.cardnumber = ?";
+            $query = "SELECT vista_borrowers.cardnumber, vista_borrowers.surname, vista_borrowers.firstname, vista_borrowers.email, 
+                      S.lib AS carrera, vista_authorised_values.lib AS departamento 
+                      FROM vista_borrowers 
+                      LEFT JOIN vista_authorised_values S ON vista_borrowers.sort2 = S.authorised_value 
+                      LEFT JOIN vista_authorised_values ON vista_borrowers.sort1 = vista_authorised_values.authorised_value 
+                      WHERE vista_borrowers.cardnumber = ?";
             
             $stmt = $this->admin_conn->prepare($query);
             $stmt->execute([$code]);
@@ -91,13 +90,12 @@ class CrossDBConnection {
             }
             
             // Si no encontramos nada, intentamos con LIKE por si acaso
-            $query = "SELECT vb.*, 
-                     S.lib AS programa, 
-                     vav.lib AS facultad 
-                     FROM vista_borrowers vb 
-                     LEFT JOIN vista_authorised_values S ON vb.sort2 = S.authorised_value 
-                     LEFT JOIN vista_authorised_values vav ON vb.sort1 = vav.authorised_value 
-                     WHERE vb.cardnumber LIKE ?";
+            $query = "SELECT vista_borrowers.cardnumber, vista_borrowers.surname, vista_borrowers.firstname, vista_borrowers.email, 
+                      S.lib AS carrera, vista_authorised_values.lib AS departamento 
+                      FROM vista_borrowers 
+                      LEFT JOIN vista_authorised_values S ON vista_borrowers.sort2 = S.authorised_value 
+                      LEFT JOIN vista_authorised_values ON vista_borrowers.sort1 = vista_authorised_values.authorised_value 
+                      WHERE vista_borrowers.cardnumber LIKE ?";
             
             $stmt = $this->admin_conn->prepare($query);
             $stmt->execute(["%$code%"]);

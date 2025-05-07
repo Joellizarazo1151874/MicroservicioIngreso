@@ -62,6 +62,9 @@
                             <li class="nav-item" id="navFuncionariosItem">
                                 <a class="nav-link" href="#" id="navFuncionarios">Funcionarios</a>
                             </li>
+                            <li class="nav-item" id="navUsuariosItem">
+                                <a class="nav-link" href="#" id="navUsuarios">Usuarios</a>
+                            </li>
                         </ul>
                         <div class="navbar-text text-white me-3">
                             <i class="fas fa-user me-1"></i> <span id="currentUser"></span>
@@ -199,22 +202,27 @@
                             <div class="tab-content mt-3">
                                 <div class="tab-pane fade show active" id="porFechaTab">
                                     <div class="row mb-3">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label for="fechaInicio" class="form-label">Fecha Inicio</label>
                                             <input type="date" class="form-control" id="fechaInicio">
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label for="fechaFin" class="form-label">Fecha Fin</label>
                                             <input type="date" class="form-control" id="fechaFin">
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label for="sedeFecha" class="form-label">Sede</label>
                                             <select class="form-select" id="sedeFecha">
                                                 <option value="">Todas las sedes</option>
                                                 <option value="Principal">Principal</option>
-                                                <option value="Norte">Norte</option>
-                                                <option value="Sur">Sur</option>
                                                 <option value="Enfermeria">Enfermería</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="programaFecha" class="form-label">Programa</label>
+                                            <select class="form-select" id="programaFecha">
+                                                <option value="">Todos los programas</option>
+                                                <!-- Se llenará dinámicamente con los programas -->
                                             </select>
                                         </div>
                                     </div>
@@ -295,26 +303,35 @@
                                 <div class="tab-pane fade show active" id="estProgramas">
                                     <form id="estProgramasForm">
                                         <div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <div class="mb-3">
                                                     <label for="estProgFechaInicio" class="form-label">Fecha
                                                         Inicio</label>
                                                     <input type="date" class="form-control" id="estProgFechaInicio">
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <div class="mb-3">
                                                     <label for="estProgFechaFin" class="form-label">Fecha Fin</label>
                                                     <input type="date" class="form-control" id="estProgFechaFin">
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <div class="mb-3">
                                                     <label for="estProgSede" class="form-label">Sede</label>
                                                     <select class="form-select" id="estProgSede">
                                                         <option value="">Todas</option>
                                                         <option value="Principal">Principal</option>
                                                         <option value="Enfermeria">Enfermería</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label for="estProgPrograma" class="form-label">Programa</label>
+                                                    <select class="form-select" id="estProgPrograma">
+                                                        <option value="">Todos</option>
+                                                        <!-- Se llenará dinámicamente con los programas -->
                                                     </select>
                                                 </div>
                                             </div>
@@ -553,20 +570,115 @@
                     </div>
                 </div>
 
+                <!-- Gestión de Usuarios Section -->
+                <div id="usuariosSection" class="content-section d-none">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <h5>Gestión de Usuarios</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-success" id="addUserBtn">
+                                    <i class="fas fa-plus"></i> Nuevo Usuario
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Usuario</th>
+                                            <th>Nivel</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTable">
+                                        <!-- Data will be loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal para Añadir/Editar Usuario -->
+            <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title" id="userModalLabel">Nuevo Usuario</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="userForm">
+                                <input type="hidden" id="userId" value="">
+                                <div class="mb-3">
+                                    <label for="usuarioInput" class="form-label">Usuario</label>
+                                    <input type="text" class="form-control" id="usuarioInput" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="passwordInput" class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control" id="passwordInput">
+                                    <small class="form-text text-muted" id="passwordHelpText">Dejar en blanco para mantener la contraseña actual (solo al editar)</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="nivelInput" class="form-label">Nivel</label>
+                                    <select class="form-select" id="nivelInput" required>
+                                        <option value="">Seleccionar nivel</option>
+                                        <option value="admin">Administrador</option>
+                                        <option value="entrada">Entrada</option>
+                                        <option value="administrativo">Administrativo</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-primary" id="saveUserBtn">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal de Confirmación de Eliminación -->
+            <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Confirmar Eliminación</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>¿Está seguro que desea eliminar este usuario?</p>
+                            <p><strong>Usuario:</strong> <span id="deleteUserName"></span></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-danger" id="confirmDeleteUserBtn">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SweetAlert2 - Añadido para notificaciones -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <script src="js/auth.js?v=1.0.1"></script>
-    <script src="js/entries.js?v=1.0.2"></script>
-    <script src="js/stats.js?v=1.0.0"></script>
+    
+    <!-- Custom JS -->
+    <script src="js/auth.js"></script>
+    <script src="js/entries.js"></script>
+    <script src="js/stats.js"></script>
     <script src="js/computo.js"></script>
     <script src="js/funcionarioService.js"></script>
-    <script src="js/app.js?v=1.0.4"></script>
+    <script src="js/users.js"></script>
+    <script src="js/app.js"></script>
 </body>
 
 </html>
