@@ -1,0 +1,104 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.2
+-- https://www.phpmyadmin.net/
+--
+-- Servidor: db:3306
+-- Tiempo de generación: 07-05-2025 a las 22:29:48
+-- Versión del servidor: 5.7.44
+-- Versión de PHP: 8.2.27
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de datos: `becl_admin`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `becl_registro`
+--
+
+CREATE TABLE `becl_registro` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `correo` varchar(100) NOT NULL,
+  `codigo` varchar(20) DEFAULT NULL,
+  `programa` varchar(100) DEFAULT NULL,
+  `facultad` varchar(100) DEFAULT NULL,
+  `entrada` datetime NOT NULL,
+  `salida` datetime DEFAULT NULL,
+  `sede` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `becl_registro`
+--
+
+INSERT INTO `becl_registro` (`id`, `nombre`, `correo`, `codigo`, `programa`, `facultad`, `entrada`, `salida`, `sede`) VALUES
+(1, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 21:39:36', NULL, 'Principal'),
+(2, 'SILVA HERNANDEZ JHAVID FERNANDO', 'jhavid123@gmail.com', '1151875', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 21:39:55', NULL, 'Principal'),
+(3, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 21:40:10', NULL, 'Principal'),
+(4, 'RIVERA ESPINEL MARIA FERNANDA', 'mariaferriveraespinel@gmail.com', '1151872', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 22:27:05', '2025-05-04 22:27:14', 'Principal'),
+(5, 'BREINNER FARID MORENO VERA', 'breinnerfaridmv@ufps.edu.co', '1151837', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 22:32:40', '2025-05-05 22:58:17', 'Enfermeria'),
+(6, 'JOSE LUIS CEBALLOS ESTUPI&Ntilde;AN', 'joseceballosj2@gmail.com', '1151889', 'INGENIERIA DE SISTEMAS', 'BECLFACULTAD DE INGENIERIA', '2025-05-04 22:33:10', NULL, 'Principal'),
+(7, 'SILVA HERNANDEZ JHAVID FERNANDO', 'jhavid123@gmail.com', '1151875', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 22:41:19', NULL, 'Principal'),
+(8, 'ROJAS VACCA LEIDDY TATIANA', 'uc2018.uv@gmail.com', '1151879', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 22:46:12', NULL, 'Principal'),
+(9, 'BRYAN ELIAS BUENDIA BLANCO', 'bryangamertnt@gmail.com', '1151877', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 22:50:48', NULL, 'Principal'),
+(10, 'JHONATHAN ELIAS BUENDIA RUIZ', 'jhonabuenr@gmail.com', '1151878', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 22:50:56', NULL, 'Principal'),
+(11, 'BOTERO VALCARCEL JONATHAN SANTIAGO', 'jonathan99botero@gmail.com', '1151869', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-04 22:51:13', NULL, 'Principal'),
+(12, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-05 04:39:57', NULL, ''),
+(13, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-05 04:44:16', NULL, 'Enfermeria'),
+(14, 'SILVA HERNANDEZ JHAVID FERNANDO', 'jhavid123@gmail.com', '1151875', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-05 05:05:39', NULL, 'Principal'),
+(15, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-05 17:32:09', NULL, 'Principal'),
+(16, 'Enderson Joel Lizarazo Gutierrez', 'endersonjoellg@ufps.edu.co', '07564', 'ADMINISTRATIVO', 'DIVISION DE BIBLIOTECA', '2025-05-05 17:32:26', NULL, 'Principal'),
+(17, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-05 17:59:41', NULL, 'Principal'),
+(18, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-05 19:36:00', NULL, 'Principal'),
+(19, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'BECL', '2025-05-05 19:47:32', NULL, 'Principal'),
+(20, 'ANDR RODRIGUEZ MURILLO', 'PIPERODRIGUEZM1@GMAIL.COM', '1151637', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-05 19:52:29', NULL, 'Principal'),
+(21, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-05 21:51:47', NULL, 'Principal'),
+(22, 'STEPHANY VIVIANA JAIMES ACEVEDO', 'stephanyvivianaja@ufps.edu.co', '1151537', 'INGENIERIA DE SISTEMAS', 'BECLFACULTAD DE INGENIERIA', '2025-05-07 15:33:13', NULL, 'Principal'),
+(23, 'STEPHANY VIVIANA JAIMES ACEVEDO', 'stephanyvivianaja@ufps.edu.co', '1151537', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-07 15:37:53', NULL, 'Principal'),
+(24, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-07 17:07:20', NULL, 'Principal'),
+(25, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-07 17:07:21', NULL, 'Principal'),
+(26, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-07 21:48:57', NULL, 'Principal'),
+(27, 'STEPHANY VIVIANA JAIMES ACEVEDO', 'stephanyvivianaja@ufps.edu.co', '1151537', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-07 21:49:17', NULL, 'Principal'),
+(28, 'IVONNE JULIETH NAVARRO BELENO', 'ivonne_ldr@hotmail.com', '1111874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-07 21:49:40', NULL, 'Principal'),
+(29, 'ENDERSON JOEL LIZARAZO GUTIERREZ', 'endersonjoellg@ufps.edu.co', '1151874', 'INGENIERIA DE SISTEMAS', 'FACULTAD DE INGENIERIA', '2025-05-07 21:58:45', NULL, 'Principal'),
+(30, 'MARCELA ALEXANDRA ACOSTA SALCEDO', 'mar.2405@hotmail.com', '1111827', 'INGENIERIA CIVIL', 'FACULTAD DE INGENIERIA', '2025-05-07 21:58:59', NULL, 'Principal'),
+(31, 'LUZ ALEXANDRA GUARIN LUNA', 'luzalexandraglun@ufps.edu.co', '1223949', 'CONTADURIA PUBLICA', 'FACULTAD DE CIENCIAS EMPRESARIALES', '2025-05-07 21:59:48', NULL, 'Principal');
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `becl_registro`
+--
+ALTER TABLE `becl_registro`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `correo_idx` (`correo`),
+  ADD KEY `codigo_idx` (`codigo`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `becl_registro`
+--
+ALTER TABLE `becl_registro`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
